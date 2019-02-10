@@ -1,7 +1,5 @@
 # Introduction to Algorithm
 
-* \*\*\*\*
-* 
 ## Algorithmic Thinking and Peak Finding
 
 ### Course Overview
@@ -380,5 +378,110 @@ The string or other things can be huge. Hash them before comparing can make thin
 
 ## Integer Arithmetic, Karatsuba Multiplication
 
+### High Precision Multiplication
 
+* Have 2 n-digit numbers and the radix \(2,10,...\). $$0\le x,y\le r^n$$ 
+* Divide and conquer. Have $$x_1$$ as high half, $$x_0$$ as low half.
+
+$$
+x=x_1r^{\frac{n}{2}}+x_0,y=y_1r^{\frac{n}{2}}+y_0,\quad 0\le x_0,x_1,y_0,y_1<r^{\frac{n}{2}}
+$$
+
+* Combine
+
+$$
+z_0=x_0y_0,z_1=x_0y_1+x_1y_0,z_2=x_1y_1
+$$
+
+$$
+z=xy=z_0+z_1r^{\frac{n}{2}}+z_2r^n
+$$
+
+We need 4 multiplies for n/2-digit numbers. Total time complexity is $$\theta(n^2)$$ 
+
+### Karatsuba Algorithm
+
+Better $$z_1$$ :
+
+$$
+z_1=(x_0+x_1)(y_0+y_1)-z_0-z_2
+$$
+
+1. Only 3 multiplications.
+
+$$
+T(n)=3T(\frac{n}{2})+\theta(n)=\theta(n^{\log_23})=\theta(n^{1.5848625...})
+$$
+
+## Square Roots, Newton's Method
+
+* Want millionth digit of $$\sqrt{2}$$ .
+
+$$
+x=\sqrt{a}\Rightarrow y=x^2-a
+$$
+
+* Using Newton's method, one time of division.
+
+$$
+x_0=1,x_{n+1}+1=\frac{x_n+\frac{a}{x_n}}{2}
+$$
+
+* Error analysis.
+
+$$
+x_n=\sqrt{a}(1+\epsilon_n)\Rightarrow x_{n+1}=\frac{\sqrt{a}}{2}((1+\epsilon_n)+\frac{1}{1+\epsilon_n})=\sqrt{a}(1+\frac{\epsilon_n^2}{2(1+\epsilon_n)})
+$$
+
+$$
+\Rightarrow \epsilon_{n+1}=\frac{\epsilon_n^2}{2(1+\epsilon_n)}
+$$
+
+### Toom-Cook
+
+Generize Karatsuba Algorithm and separate the number into 3 parts each time.
+
+$$
+T(n)=5T(\frac{n}{3})+\theta(n)=\theta(n^{\log_35})
+$$
+
+### High-precision Division
+
+* Want a high-precision of $$\frac{a}{b}$$ , first compute high-precision of $$\frac{1}{b}$$.
+* Compute $$\lfloor\frac{R}{b}\rfloor$$ , where R is a large enough number $$2^k$$ and makes the division easy. To do that, we set up a function and find its zero using Newton's method.
+
+$$
+f(x)=\frac{1}{x}-\frac{b}{R},f'(x)=-\frac{1}{x^2},x_{n+1}=x_n-\frac{f(x_n)}{f'(x_n)}=2x_n-\frac{b}{R}x_n^2
+$$
+
+## Breadth-First Search \(BFS\)
+
+### Graph Features
+
+A graph consists of a set of vertices and a set of edges. The edges can be represented as ordered or unordered pairs, corresponding to directed and undirected graph.
+
+$$
+G=(V,E),E=\{\{v,w\}...\}or\{(v,w)...\}
+$$
+
+#### Applications
+
+* Web crawling
+* Social networking
+* Netword broadcast
+* Garbage collection
+* Modeling checking
+* Checking mathematical conjection
+* Solving puzzles and games
+
+### Adjacency List
+
+Each vertices has a linked list pointing towards the linked/neighbour/able to reach by a single move vertices. Memory complexity is $$\theta(|V|+|E|)$$ .
+
+### BFS
+
+* Goal: visit all nodes reachable from given $$s\in V$$ 
+* Time complexity: $$O(|V|+|E|)$$ 
+* Implementation: look at nodes reachable in 0 move, 1 move, 2moves, ...
+* Be careful to avoid duplicates with a set.
 
