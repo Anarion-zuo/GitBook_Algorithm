@@ -485,3 +485,68 @@ Each vertices has a linked list pointing towards the linked/neighbour/able to re
 * Implementation: look at nodes reachable in 0 move, 1 move, 2moves, ...
 * Be careful to avoid duplicates with a set.
 
+## Dynamic Programming \(DP\)
+
+### Basic Idea
+
+1. Take a problem
+2. Split it into subproblems
+3. Reuse the solution
+
+### Example: Fibonacci Numbers
+
+#### Defination
+
+
+
+$$
+F_1=F_2=1,F_n=F_{n-1}+F_{n-2}
+$$
+
+#### Naive Recursive Algorithm
+
+```cpp
+unsigned int fib(unsigned int n){
+    if (n == 1 || n == 2)
+        return 1;
+    return fib(n - 1) + fib(n - 2);
+}
+```
+
+Exponential time complexity:
+
+$$
+T(n)=T(n-1)+T(n-2)+O(1)
+$$
+
+#### Memorized DP
+
+Compute each Fibonacci term and store it for later computation.
+
+#### Bottom Up DP
+
+$$
+DP=recursion+memorization
+$$
+
+$$
+time=\#subproblems\times time/subproblem
+$$
+
+```cpp
+unsigned int fib(unsigned int n){
+    if (n == 1 || n == 2)
+        return 1;
+    unsigned int n1 = 1, n2 = 1;
+    for (unsigned int i = 2; i <= n; ++i){
+        n1 = n1 + n2;
+        n2 = n2 + n1;
+    }
+    return n1;
+}
+```
+
+This code takes constant memory and linear time. It does the same thing as Memory version and takes less memory. It topologically sort the subproblem dependency DAG.
+
+### Example: Shortest Path
+
