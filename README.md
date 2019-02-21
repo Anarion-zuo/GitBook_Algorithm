@@ -550,3 +550,21 @@ This code takes constant memory and linear time. It does the same thing as Memor
 
 ### Example: Shortest Path
 
+### Example: Text Justification
+
+In some text-editing software or a pdf-printer, the characters that the user enters into the screen must be presented in a good-looking way. These softwares do not want the texts to be too loose in each lines. 
+
+$$
+badness(i,j)=\begin{cases}
+(page\_width-total\_width)^N & N=\text{2 or 3 or others}\\
+\infty & \text{if don't fit}
+\end{cases}
+$$
+
+1. Subproblems:
+   * Try all 
+
+## Computational Complexity
+
+
+
