@@ -29,7 +29,7 @@ The correct answer should be that to scan the $$f(i)$$s associated with the list
 
 Given a list of intervals L, greedy algorithm with earliest finish time produces k intervals, where k is the maximum.
 
-#### Introduction on $$k^\star$$ 
+#### Introduction on $k^\star$ 
 
 Base case: $$k^\star=1$$ any interval would work.
 
@@ -59,7 +59,7 @@ $$
 S^{\star\star}=<s(i_1),f(i_1)>,<s(j_2),f(j_2)>,...,<s(j_{k^\star+1}),f(j_{k^\star+1})>
 $$
 
-Define $$L'$$ as the set of intervals with $$s(i)\ge f(i_1)$$. Since $$S^{\star\star}$$ is optimal for $$L$$, $$S^{\star\star}[2,...,k^\star+1]$$ is optimal for $$L'$$. Therefore, optimal schedule for $$L'$$ has $$k^\star$$ size. By the inductive hypothesis, run the greedy algorithm on $$L'$$ should produce a schedule of size $$k^\star$$.
+Define $L'$ as the set of intervals with $s(i)\ge f(i_1)$. Since $S^{\star\star}$ is optimal for $L$, $S^{\star\star}[2,...,k^\star+1]$ is optimal for $L'$. Therefore, optimal schedule for $L'$ has $k^\star$ size. By the inductive hypothesis, run the greedy algorithm on $L'$ should produce a schedule of size $k^\star$.
 
 ## Divide and Conquer: Convex Hull, Median Finding
 
@@ -70,4 +70,13 @@ T(n)=aT(\frac{n}{b})+T_{merge}
 $$
 
 ### Convex Hull
+For a given set of points, find the set of edges connecting the points that would form a convex shape. A shape with one point stretching out and forming a line is still a convex hull.
+
+Given n points in a plane,
+$$
+S=\{(x_i,y_i)|_{i=1,2,...}\}
+$$
+Assume no 2 have the same x and y coordinate and no 3 in a line. A convex hull is the smallest convex polygon containing all points in S, and we are going to call that $CH(S)​$.
+
+![1550826046400](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1550826046400.png)
 
