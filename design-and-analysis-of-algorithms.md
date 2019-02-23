@@ -95,7 +95,7 @@ The simplest idea of merging is to look at all pairs in turn for all points on b
 
 ![1550896139397](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1550896139397.png)
 
-If connect $a_4$ to $b_1$, the problem is not solved. Sometimes, it is not the line between the highest points that is the highest line. The factor showing the height of the line should be told by a intersection between the connecting line and a vertical line between the 2 hulls.
+If connect $a_4​$ to $b_1​$, the problem is not solved. Sometimes, it is not the line between the highest points that is the highest line. The factor showing the height of the line should be told by a intersection between the connecting line and a vertical line between the 2 hulls.
 
 ![1550898175718](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1550898175718.png)
 
@@ -291,7 +291,7 @@ Time complexity:
 $$
 T(n,|X|)=2T(\frac{1}{2}n,|X|)+O(n+|X|)=O(n^2)
 $$
-If, some how, $T(n,|X|)=2T(\frac{1}{2}n,\frac{1}{2}|X|)+O(n+|X|)$, where $|X|$ changes in the same way as $n$, the result can be $O(n\log_2n)$. To achieve such goal, we construct $X$ by the property of negative numbers and imaginary numbers, for the square of negative numbers are positive numbers and the square of imaginary numbers are negative numbers, so that when taking the square of the set, the set squeezes and becomes small. For some special cases, we take X as following, taking even-sect points from a unit circle on a complex plane, also known as the nth root of unity:
+If, some how, $T(n,|X|)=2T(\frac{1}{2}n,\frac{1}{2}|X|)+O(n+|X|)​$, where $|X|​$ changes in the same way as $n​$, the result can be $O(n\log_2n)​$. To achieve such goal, we construct $X​$ by the property of negative numbers and imaginary numbers, for the square of negative numbers are positive numbers and the square of imaginary numbers are negative numbers, so that when taking the square of the set, the set squeezes and becomes small. For some special cases, we take X as following, taking even-sect points from a unit circle on a complex plane, also known as the nth root of unity:
 $$
 \begin{align*}
 &|X|=1,X=\left\{1\right\}\\
@@ -325,5 +325,93 @@ A^\star=FFT(A),B^\star=FFT(B),C^\star_k=A^\star_kB^\star_k,\forall k
 $$
 For V, the inverse matrix:
 $$
-V^{-1}=\frac{\bar{V}}{n}
+V^{-1}=\frac{\bar{V}}{n},\bar{V}_{jk}=\frac{1}{V_{jk}}=e^{-\frac{ijk\tau}{n}}
 $$
+Proof for that:
+$$
+V\bar{V}=P,P_{jk}=\sum_{m=0}^{n-1}e^{i\tau jm/n}e^{-i\tau mk/n}=\sum_{m=0}^{n-1}e^{i\tau(j-k)m/n}
+$$
+Obviously, when $j=k$, $P_{jk}=1$. For $j\ne k​$:
+$$
+\sum_{m=0}^{n-1}(e^{i\tau(j-k)/n)^m}=\frac{e^{i\tau(j-k)}-1}{e^{i\tau(j-k)/n}-1}=0
+$$
+QED.
+
+## Divide and Conquer: van Emde Boas Trees
+
+The goal is to maintain n elements among $\left\{0,1,...,u-1\right\}$, a set of continuous integers,with operations of insertion and deletion with complexity $\theta(\log_2\log_2n)$. When doing binary search on the levels of binary trees, we get:
+$$
+T(k)=T(\frac{1}{2}k)+O(1),k=\log_2u
+$$
+Actually plug in u:
+$$
+T'(u)=T'(\sqrt{u})+O(1)
+$$
+
+### Bit Vector
+
+A bit vector is an array of size u, with 1 for presence and 0 fir absence. Given that the set is continuous, we can take advantage of that and maintain an array of bits, showing whether a certain integer is in the set. Based on such idea, we build up a simple tree whose upper level signifies the Or result of the children.![1550923500760](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1550923500760.png)
+
+The top bits consist the summary vector. We hereby split the universe into clusters, in the picture here, separated by red lines. In this version, the total size is limited down to the square root of the origin, $\sqrt{u}$.
+
+Insert complexity is constant. Successor operation is to:
+
+1. Look in x’s cluster. If is not there, go on.
+
+2. Look for the next 1 in summary vector.
+
+3. Look for the first 1 in that cluster.
+
+   Time complexity $O(\sqrt{u})$.
+
+To translate between actual index and the cluster the index belongs, $x=i\sqrt{u}+j$, where $i$ is the index of cluster and j is the index within cluster. More specifically:
+$$
+i=high(x)=\left\lfloor\frac{x}{\sqrt{u}}\right\rfloor,j=low(x)=x\mod \sqrt{u}
+$$
+To be even more specific, high and low simply means the high half of the binary representation of x and low half means likewise.
+
+![1550927105924](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1550927105924.png)
+
+## Recurse
+
+The data structure is represented by $V$, consisting with 2 parts.
+
+```
+V = size - u
+V.cluster[i] = size - \sqrt{u}
+V.summary = size - sqrt{u}
+0\le i\le \sqrt{u}
+```
+
+#### Insert
+
+```
+Insert(V,x) = Insert(V.cluster[high(x)],low(x))+Insert(V.summary,high(x))
+```
+
+$$
+T(u)=2T(\sqrt{u})+O(1)=O(\log_2u)
+$$
+
+
+
+#### Successor
+
+```
+Successor(V,x):
+	i = high(x)
+	j = Successor(V.cluster[i],low(x))
+	if j == \infty:
+		i = Successor(V.summary,i)
+		j = Successor(V.cluster[i],-\infty)
+	return index(i,j)
+```
+
+$$
+T(u)=O((\log_2u)^{\log_23})
+$$
+
+These are both bad algorithm for they both call themselves for multiple times.
+
+#### Store Minimum
+
