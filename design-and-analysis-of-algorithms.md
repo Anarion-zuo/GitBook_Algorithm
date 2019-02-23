@@ -8,8 +8,8 @@ We have resources and requests. Each of the requests corresponds to an interval 
 
 The strategy is to maximize the profit at each step without apparent look ahead.
 
-1. Use a simple rule to select a request $$i$$ .
-2. Refect all requests incompatible with $$i$$ .
+1. Use a simple rule to select a request $$i​$$ .
+2. Reject all requests incompatible with $$i$$ .
 3. Repeat until all requests are processed.
 
 Wrong answers:
@@ -21,7 +21,7 @@ Wrong answers:
 
 As can be seen from the picture, the 4 requests at the top is the answer while it cannot be found by the methods above.
 
-The correct answer should be that to scan the $$f(i)$$s associated with the list of requests that we have and pick the one that is minimum, which also signifies that find the request associated with the earliest finish time, and eliminate the ones that do not satisfy the condition, at each step.
+The correct answer should be that to scan the $$f(i)​$$s associated with the list of requests that we have and pick the one that is minimum, which also signifies that find the request associated with the earliest finish time, and eliminate the ones that do not satisfy the condition, at each step.
 
 ### Proof of Greedy Strategy by Induction
 
@@ -80,3 +80,250 @@ Assume no 2 have the same x and y coordinate and no 3 in a line. A convex hull i
 
 ![1550826046400](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1550826046400.png)
 
+To check whether a line between the 2 points is a segment, which is the out most edge of the convex polygon, we simply check whether there are points at both sides of the line. If there is no side of the line that has no point, it is not a segment.
+
+The simplest idea is to try every line for every points. There are $O(n)$ points to test and $O(n)$ lines to test for each point. With test complexity $O(n)$, the total complexity is $O(n^3)$.
+
+The divide and conquer idea is to find the convex hull separately and merge them into one.
+
+1. Sort the points by x coordinate.
+2. For input set S, divide into left-half A and right-half B by x coordinate.
+3. Compute $CH(A)$ and $CH(B)$.
+4. Combine.
+
+The simplest idea of merging is to look at all pairs in turn for all points on both sides with complexity $\theta(n^2)$. A clever-looking idea may be to connect the points with the largest and smallest y coordinate in pair, but incorrect. 
+
+![1550896139397](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1550896139397.png)
+
+If connect $a_4$ to $b_1$, the problem is not solved. Sometimes, it is not the line between the highest points that is the highest line. The factor showing the height of the line should be told by a intersection between the connecting line and a vertical line between the 2 hulls.
+
+![1550898175718](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1550898175718.png)
+
+The complexity is linear to the number of points, $\theta(n)$. The total complexity of the whole algorithm:
+$$
+T(n)=2T(\frac{n}{2})+\theta(n)=\theta(n\log_2n)
+$$
+
+### Median Finding
+
+We want to do it better than sort-and-find approach. And not only to find the median value, but also to find any value for a given rank.
+
+0. For a given array of numbers $S$, make a clever choice of $x\in S$.
+1. Compute $k=rank(x)​$.
+2. Split the array into 2 parts. $B=\{y\in S|y<x\},C=\{y\in S|y>x\}​$
+3. If $k=desired\_rank​$, return. Else if $k>i​$, run $B​$, else run $C​$.
+
+For a worst case scenario, we choose x badly every time, which makes B and C extremely unbalanced. The complexity would be $\theta(n^2)​$. The idea of choosing x cleverly is to split the array into subarrays with size $\left\lceil\frac{n}{5}\right\rceil​$. Sort each subarray with complexity $\theta(\left\lceil\frac{n}{5}\right\rceil)​$. Choose the median of the medians of the subarrays to be x.
+
+![1550900613561](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1550900613561.png)
+
+Then B and C can be evenly generated. Final time complexity:
+$$
+T(n)=\begin{cases}
+O(1) & n\le some\_constant(140)\\
+T(\left\lceil\frac{n}{5}\right\rceil)+T(\frac{7n+6}{10})+\theta(n)=\theta(n) & otherwise
+\end{cases}
+$$
+
+## Divide and Conquer: Matrix Multiplication Strassen Algorithm
+
+When calculated by hand, time complexity of matrix multiplication is $\theta(mn^2)$ for $A_{n\times m}\times B_{m\times n}$. It can be improved by divide and conquer idea.
+
+### Naive Idea
+
+1. Evenly split the matrices into 4 parts. $A=\left[\begin{array}\\
+   A_{11} & A_{12}\\
+   A_{21} & A_{22}
+   \end{array}\right]​$
+2. Compute. $C_{11}=A_{11}B_{11}+A_{12}B_{21}$
+3. Recursively compute.
+
+Time complexity:
+$$
+T(n)=8T(\frac{n}{2})+O(n^2)
+$$
+
+### Strassen
+
+Instead of computing the multiplication directly, compute some of these terms as parts.
+$$
+\begin{cases}
+M_1=(A_{11}+A_{22})(B_{11}+B_{22})\\
+M_2=(A_{21}+A_{22})B_{11}\\
+M_3=A_{11}(B_{12}-B_{22})\\
+M_4=A_{22}(B_{21}-B_{11})\\
+M_5=(A_{11}+A_{12})B_{22}\\
+M_6=(A_{21}-A_{11})(B_{11}+B_{12})\\
+M_7=(A_{12}-A_{22})(B_{21}+B_{22})
+\end{cases},\begin{cases}
+C_{11}=M_1+M_4-M_5+M_7\\
+C_{12}=M_3+M_5\\
+C_{21}=M_2+M_4\\
+C_{22}=M_1-M_2+M_3+M_6
+\end{cases}
+$$
+A man must work on a certain area for 10 years to come up with this algorithm, oh my god! Each of $C_{xx}​$ only requires a single time of multiplication. Time complexity:
+$$
+T(n)=7T(\frac{n}{2})+O(n^2)
+$$
+
+## Master Theorem
+
+$$
+\begin{align*}  
+T(n)&=aT(\frac{n}{b})+f(n)\\
+&=\sum_{i=0}^ta^if(\frac{n}{b^i})\\
+&=\begin{cases}
+\theta(n^{\log_ba}) & f(n)=O(n^c),c<\log_ba\\
+\theta(n^c\log_2^{k+1}n) & f(n)=\theta(n^c\log_2^kn),c=\log_ba\\
+\theta(f(n)) & f(n)=\Omega(n^c),c>\log_ba
+\end{cases}  \\  
+\end{align*}
+$$
+
+### Case 1
+
+$$
+T(n)=\sum_{i=0}^ta^if(\frac{n}{b^i})
+=\sum_{i=0}^ta^i(\frac{n}{b^i})^c
+=\theta(a^t)=\theta(n^{\log_ba}),
+t=\log_bn
+$$
+
+The other cases follows the same idea.
+
+## Divide and Conquer: Fast Fourier Transform (FFT)
+
+### Operations on Polynomials
+
+#### Representation
+
+##### Coefficient Vector
+
+$$
+A(x,n)=\sum_{i=0}^{n-1}a_ix_i=a_0+a_1x+a_2x^2+...+a_{n-1}x^{n-1}
+$$
+
+##### Roots
+
+$$
+A(x)=\prod_{i=0}^{n-1}(x-r_i)
+$$
+
+According to some basic theorem of algebra, every polynomial can be represented by a series of roots.
+
+##### Samples
+
+Also according to some basic theorem of algebra, every polynomial can be represented by a series of 2-d points.
+
+#### Evaluation
+
+Compute $A(x_0)​$.
+
+The naive idea may be to separately compute each term and add them up with complexity $\theta(n^2)$. A slightly smarter idea is to time a $x_0$ each time when computing a new term with complexity $\theta(n)​$. A slightly smarter way than that is the Horner’s Rule:
+$$
+A(x)=a_0+x(a_1+x(a_2+...+x(a_{n-1})...)),\theta(n)
+$$
+
+#### Addition
+
+Compute $A(x)+B(x)$. Simply adding corresponding coefficients.
+
+#### Multiplication
+
+Compute $A(x)\times B(x)$. When doing this by hand:
+$$
+c_k=\sum_{j=0}^ka_jb_{k-j},\theta(n^2)
+$$
+
+|                | Coefficient Vector | Roots    | samples  |
+| -------------- | :----------------: | -------- | -------- |
+| Evaluation     |      $ O(n)$       | $ O(n) $ | $O(n^2)$ |
+| Addition       |       $O(n)$       | $\infty$ | $ O(n) $ |
+| Multiplication |      $O(n^2)$      | $ O(n) $ | $ O(n) $ |
+
+### Converting between Coefficient Vector and Samples
+
+$$
+V_n=\begin{pmatrix}
+1 & x_0 & x_0^2 & ... & x_0^{n-1}\\
+1 & x_1 & x_1^2 & ... & x_1^{n-1}\\
+1 & x_2 & x_2^2 & ... & x_2^{n-1}\\
+\vdots &\vdots &\vdots &\ddots &\vdots\\
+1 & x_{n-1} & x_{n-1}^2 & ... & x_{n-1}^{n-1}\\
+\end{pmatrix},A=\begin{pmatrix}
+a_0\\
+a_1\\
+\vdots\\
+a_{n-1}
+\end{pmatrix}
+$$
+
+For a transform from coefficient to samples:
+$$
+\begin{pmatrix}
+y_0\\
+y_1\\
+\vdots\\
+y_{n-1}
+\end{pmatrix}=V_n\times A
+$$
+
+
+#### Divide and Conquer Algorithm
+
+Goal: To compute all $A(x)$ for $x\in X​$.
+
+1. Divide the coefficients into even and odd parts.
+   $$
+   A_{even}(x)=\sum_{k=0}^{\frac{1}{2}n-1}a_{2k}x^k,
+   A_{odd}(x)=\sum_{k=0}^{\frac{1}{2}n}a_{2k+1}x^k
+   $$
+
+2. Conquer. Recursively compute  $A_{even}(y)$ and $A_{odd}(y)$ for $y\in X^2$.
+
+3. Combine.
+   $$
+   A(x)=A_{even}(x^2)+xA_{odd}(x^2)
+   $$
+
+Time complexity:
+$$
+T(n,|X|)=2T(\frac{1}{2}n,|X|)+O(n+|X|)=O(n^2)
+$$
+If, some how, $T(n,|X|)=2T(\frac{1}{2}n,\frac{1}{2}|X|)+O(n+|X|)$, where $|X|$ changes in the same way as $n$, the result can be $O(n\log_2n)$. To achieve such goal, we construct $X$ by the property of negative numbers and imaginary numbers, for the square of negative numbers are positive numbers and the square of imaginary numbers are negative numbers, so that when taking the square of the set, the set squeezes and becomes small. For some special cases, we take X as following, taking even-sect points from a unit circle on a complex plane, also known as the nth root of unity:
+$$
+\begin{align*}
+&|X|=1,X=\left\{1\right\}\\
+&|X|=2,X=\left\{1,-1\right\}\\
+&|X|=4,X=\left\{1,-1,i,-i\right\}\\
+&|X|=8,X=\left\{1,-1,i,-i,\pm\frac{1}{\sqrt{2}}(1+i),\pm\frac{1}{\sqrt{2}}(1-i)\right\}\\
+\end{align*}
+$$
+In angular form:
+$$
+(\cos\theta,\sin\theta)=\cos\theta+i\sin\theta=e^{i\theta},\theta\in\left\{0,\frac{1}{n}\tau,\frac{2}{n}\tau,...,\frac{n-1}{n}\tau,\right\},\tau=2\pi
+$$
+In general:
+$$
+x_k=e^{\frac{ik\tau}{n}}
+$$
+
+#### Discrete Fourier Transform
+
+$$
+y=V\times A,V_{jk}=x_j^k=e^{\frac{ijk\tau}{n}}
+$$
+
+The FFT is the divide and conquer version of DFT.
+
+### Fast Polynomials Multiplication
+
+Notations:
+$$
+A^\star=FFT(A),B^\star=FFT(B),C^\star_k=A^\star_kB^\star_k,\forall k
+$$
+For V, the inverse matrix:
+$$
+V^{-1}=\frac{\bar{V}}{n}
+$$
