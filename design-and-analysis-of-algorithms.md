@@ -413,5 +413,22 @@ $$
 
 These are both bad algorithm for they both call themselves for multiple times.
 
-#### Store Minimum
+#### Do Less Recursion
+
+The way to reduce recursion is to store the current minimum value. In the insert operation, if the inserting x is smaller than the current minimum, the minimum should be refreshed and 
+
+## Amortization: Amortized Analysis
+
+Amortized cost in hash table is always 0, though for some it might not be so. This reflects a certain kind of Amortization, called the Aggregate method. In general, the cost of each step is not necessarily small, while on average, it gives a amortized cost of a smaller result.
+
+Amortized bounds are to assign amortized cost for each operation such that it “preserve the sum”. 
+$$
+\sum_{op}amortized\_cost\ge\sum_{op}actual\_cost
+$$
+Under this model, there may be some occasionally larger complexity, while it does not matter, for it is fine amortizedly. For example, in 2-3 Trees, when the tree needs to grow, the complexity grows, while the amortized cost is not so great.
+
+### Example: Accounting Method
+
+- Allow an operation to store credit in bank account.
+- Allow an operation to pay for time using credit in bank balance.
 

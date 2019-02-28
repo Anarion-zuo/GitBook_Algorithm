@@ -38,7 +38,7 @@ $$
 
 The approach is known as the Greedy Ascent algorithm.
 
-* Chose a starting point arbitrarily. Check if it satisfies the terms. 
+* Chose a starting node arbitrarily. Check if it satisfies the terms. 
 * If not, move to the position having a larger number than the original number, and so forth. 
 
 The worst case goes through all positions. In most cases, we prefer the starting position to be the center. However, such algorithm fails when at a certain column there is no peak.
@@ -303,7 +303,7 @@ The operation can only be applied to AVL trees and stated as follows. For a give
 
 #### Radix Sort
 
-* Imagine each integer as base b. The number of digits, d, is $\log\_bk$, as k is the digit's index required.
+* Imagine each integer as base b. The number of digits, d, is $\log\_bk​$, as k is the digit's index required.
 * Sort integers by least significant digit,
 * ...
 * Sort integers by most significant digit.
@@ -476,14 +476,80 @@ $$
 
 ### Adjacency List
 
-Each vertices has a linked list pointing towards the linked/neighbour/able to reach by a single move vertices. Memory complexity is $$\theta(|V|+|E|)$$ .
+Each vertices has a linked list pointing towards the linked/neighbour/able to reach by a single move vertices. Memory complexity is $$\theta(|V|+|E|)​$$ .
 
 ### BFS
 
 * Goal: visit all nodes reachable from given $$s\in V$$ 
 * Time complexity: $$O(|V|+|E|)$$ 
-* Implementation: look at nodes reachable in 0 move, 1 move, 2moves, ...
+* Implementation: look at nodes reachable in 0 move, 1 move, 2 moves, ...
 * Be careful to avoid duplicates with a set.
+
+### Shortest Path
+
+Normally, we consider a graph with positive weighted edges, while negative weight can also exist.
+
+#### General Structure
+
+No negative cycle, or the algorithm infinitely takes cycle at some place:
+
+- Initialize at starting point.
+- Repeatedly select edge edge $(u,v)$ and “relax” edge $(u,v)$.
+  - If $d[v]>d[u]+w(u,v)$, $d[v]=d[u]+w(u,v),\pi[v]=u$.
+  - Until all edges have $d[v]\le d[u]+w(u,v)$,
+
+#### OPL Substructure
+
+- Subpaths of a shortest path are shortest paths.
+
+#### Dijkstra
+
+##### Relaxation Operation
+
+```
+Relax(u,v,w):
+	if d[v] > d[u] + w(u,v):
+		d[v] = d[u] + w(u,v)
+		\pi[v] = u
+```
+
+A simple lamma can proof relaxation is safe: The relaxation operation maintains the invariant that $d[v]\ge \delta(s,v),\forall v\in V$. The lamma can be easily proofed by induction.
+
+##### DAGs (Directed Acyclic Graphs)
+
+DAGs cannot have negative cycles. Graphs only containing negative edges are OK. There are some obvious properties:
+
+1. Topological sort the DAG. Path from u to v implies that u is before v in the ordering.
+2. One pass over vertices in topologically sorted order. Relax each edge that leaves each vertex.
+
+Complexity:
+$$
+T(n)=\theta(|V|+|E|)
+$$
+
+
+##### Goal
+
+For a give graph, with vertices $V$, starting point $s$, minimize the distance between the starting point and any other vertices to get function $\delta(s,v),\forall v$. For each $v$, define a predecessor $\pi[v]$. If we build an actual model consisting of balls signifying nodes and strings signifying edges. The lengths of the strings signifies weights of the strings. If we want the result of Dijkstra for any vertices in the graph, hold up the starting vertex and count the balls from the top to the bottom. Tensed strings suggest a direct link between the 2 vertex and we hereby get the series of Dijkstra results.
+
+By this idea of gravity, Dijkstra is introduced. For each vertex in the graph, we find the nearest next vertex like we do in counting balls.
+
+##### Main Procedure
+
+```
+Dijkstra(G,W,s):
+	Initialize(G,s):
+		S = \null    //processed vertices
+		Q = V[G]     //unprocessed vertices
+		d[s] = 0
+	while Q is not \null:
+    	u = extract_min(Q)   //find the nearest vertex and delete from Q
+    	S = S + {u}
+    	for each vertex v in Adj[u]:
+			Relax(u,v,W)
+```
+
+Q can be implemented by a priority queue, which adds all of the vertices next to the currently handling vertex according to their weights of edges. Delete the extracted vertex each time.
 
 ## Dynamic Programming \(DP\)
 
