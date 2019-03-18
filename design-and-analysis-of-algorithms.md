@@ -337,6 +337,14 @@ $$
 $$
 QED.
 
+## Data Structure: B-Tree
+
+A B-Tree has nodes with n elements and n+1 children between each of the elements. The node which is the children between some other nodes means that the node contains elements holding comparative properties saying it is between the 2 sizes of the elements above. 
+
+### Properties
+
+1. $1\le$
+
 ## Divide and Conquer: van Emde Boas Trees
 
 The goal is to maintain n elements among $\left\{0,1,...,u-1\right\}$, a set of continuous integers,with operations of insertion and deletion with complexity $\theta(\log_2\log_2n)$. When doing binary search on the levels of binary trees, we get:

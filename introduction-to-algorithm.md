@@ -46,7 +46,7 @@ The worst case goes through all positions. In most cases, we prefer the starting
 #### A Better 2D Version
 
 * Pick the middle column $j = \frac{m}{2}$. Find global max on column $j$ at $\(i,j\)$.
-* Pick left columns if $a\(i,j-1\)&gt;a\(i,j\)$. If $a\(i,j\)\le a\(i,j-1\),a\(i,j+1\)$, we have a peak.
+* Pick left columns if $a\(i,j-1\)gt;a\(i,j\)$. If $a\(i,j\)\le a\(i,j-1\),a\(i,j+1\)$, we have a peak.
 * When having a single column, find the max and done.
 
 Time complexity:
@@ -530,7 +530,7 @@ $$
 
 ##### Goal
 
-For a give graph, with vertices $V$, starting point $s$, minimize the distance between the starting point and any other vertices to get function $\delta(s,v),\forall v$. For each $v$, define a predecessor $\pi[v]$. If we build an actual model consisting of balls signifying nodes and strings signifying edges. The lengths of the strings signifies weights of the strings. If we want the result of Dijkstra for any vertices in the graph, hold up the starting vertex and count the balls from the top to the bottom. Tensed strings suggest a direct link between the 2 vertex and we hereby get the series of Dijkstra results.
+For a give graph, with vertices $V​$, starting point $s​$, minimize the distance between the starting point and any other vertices to get function $\delta(s,v),\forall v​$. For each $v​$, define a predecessor $\pi[v]​$. If we build an actual model consisting of balls signifying nodes and strings signifying edges. The lengths of the strings signifies weights of the strings. If we want the result of Dijkstra for any vertices in the graph, hold up the starting vertex and count the balls from the top to the bottom. Tensed strings suggest a direct link between the 2 vertex and we hereby get the series of Dijkstra results.
 
 By this idea of gravity, Dijkstra is introduced. For each vertex in the graph, we find the nearest next vertex like we do in counting balls.
 
@@ -551,7 +551,79 @@ Dijkstra(G,W,s):
 
 Q can be implemented by a priority queue, which adds all of the vertices next to the currently handling vertex according to their weights of edges. Delete the extracted vertex each time.
 
-## Dynamic Programming \(DP\)
+##### Problems
+
+1. Complexity may be exponential under some special cases.
+
+    ![1552483820276](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1552483820276.png)
+
+   Complexity:
+   $$
+   T(n)=O(2^{\frac{n}{2}})
+   $$
+
+2. Might not even terminate for negative cycles.
+
+#### Bellman Ford
+
+Solve graphs with negative cycles. The process report the existence of negative loop, by saying the shortest path towards vertices beyond the negative cycle is not defined, and abort because of it.
+
+```
+BellmanFord(G,W,s):
+	Initialize()
+    for i=1 to |V|-1:
+        for each edge(u,v) in E:
+            Relax(u,v,w)
+    for each edge(u,v) in E:     //check
+    	if d[v] > d[u] + w(u,v):
+    		report negative cycle exists
+Relax(u,v,w):
+	if d[v] > d[u] + w(u,v):
+        d[v] = d[u] + w(u,v)
+        \pi[v] = u
+```
+
+Complexity:
+$$
+T(n)=O(|V||E|)
+$$
+
+##### Proof
+
+For a given starting vertex $S$, and a ending vertex $V_k$, there is $k\le|V|-1$. Let destined vertex be $v\in V$, a certain path be $p=(V_0,V_1,...,V_k),V_0=S$ from $S$ to $V_k=v$. This path is a shortest path with minimum number of edges. Because at each step we make the sub-path a shortest path, by induction, the result is appropriate.
+
+##### Check
+
+If after $|V|-1$ vertices searched along the path, we find another edge that can be relaxed, the current shortest path from $S$ to some vertex $v$ is not “simple”, and a cycle is found.
+
+##### Simple Shortest Path
+
+If we neglect the negative cycles and follow the same mechanism, the problem may be a NP-hard problem, which has to be solved in exponential time.
+
+#### Longest Path
+
+Following a similar idea, we relax the edges to find the longest edge at each step. In addition, running Bellman-Ford with adding a minus sign in front of the weight can find the longest path, or other ways of flipping the comparators.
+
+### Speeding Dijkstra
+
+#### Old Dijkstra
+
+```
+Initialize():
+	d[S] = 0
+	d[u is not S] = \infty
+Q = V[a]
+while Q is not null:
+	do u = EXTRACT_MIN(Q)
+	for each vertex v in Adj[u]:
+		do Relax(u,v,w)
+```
+
+#### Bi-directional Search
+
+Run Dijkstra on both direction. Drop the traversed vertices at each step. When some vertex u has been processed both in the forward search and backward search, the process is terminated. First, find a vertex x, having minimum $d_f[x]+d_b[x]$. If x was processed first from both $Q_f$ and $Q_b$, find shortest path using $\Pi_f$ from S to x, then find shortest path using $\Pi_b​$ from t to x, backwardly. 
+
+## Dynamic Programming \(DP)
 
 ### Basic Idea
 
@@ -561,7 +633,9 @@ Q can be implemented by a priority queue, which adds all of the vertices next to
 
 ### Example: Fibonacci Numbers
 
-#### Defination
+#### Definition
+
+
 
 
 
@@ -615,6 +689,8 @@ unsigned int fib(unsigned int n){
 This code takes constant memory and linear time. It does the same thing as Memory version and takes less memory. It topologically sort the subproblem dependency DAG.
 
 ### Example: Shortest Path
+
+
 
 ### Example: Text Justification
 
