@@ -627,9 +627,11 @@ Run Dijkstra on both direction. Drop the traversed vertices at each step. When s
 
 ### Basic Idea
 
-1. Take a problem
-2. Split it into subproblems
-3. Reuse the solution
+1. Define subproblems.
+2. Guess a part of the result.
+3. Recurrence
+4. Recurse + Memorize or Bottom-up.
+5. Original problem.
 
 ### Example: Fibonacci Numbers
 
@@ -705,6 +707,31 @@ $$
 
 1. Subproblems:
    * Try all 
+
+### Example: Guitar Fingering
+
+For a given sequence of n notes, find the best fingering, namely, the nearest finger, for each note.
+
+- Fingers 1,2,…,F, assign them to each note.
+- Difficulty measure for each transferring of note, how far does the finger have to move to get to the next node. d(p,f,q,g), how difficult it is to transfer from pressing note p with finger f to pressing note q with finger g.
+
+1. subproblems = how to play notes[i:] when use f for notes[i]
+2. guess: finger g for notes[i+1]
+3. recurrence: 
+
+```
+DP(i,f) = min(DP(notes[i+1],g)+d(notes[i],f,notes[i+1],g)) for g in 1,...,F)
+```
+
+4. topo-order:
+
+```
+for i in reversed(range(n)):
+	for f in 1,...,F:
+		DP(i,F)
+```
+
+
 
 ## Computational Complexity
 

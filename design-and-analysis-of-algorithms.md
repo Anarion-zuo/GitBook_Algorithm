@@ -343,11 +343,23 @@ A B-Tree has nodes with n elements and n+1 children between each of the elements
 
 ### Properties
 
-1. $1\le$
+$B$ is the number of elements on each node.
+
+1. $B\le​$ #children $\le 2B​$
+2. $B-1\le$ #keys $< 2B-1​$
+3. All leaves are at same depth
+
+### Insertion
+
+When there is a potential overflow in a node, insert the element into the rightful place and split the node by the center and move the central element up to the parent node, with the split result to be 2 new nodes. If the parent also encounters an overflow after the split process, apply the split process upon the parent. If we reach the root and root has an overflow, create a new root according to the same process.
+
+### Deletion
+
+When deleting on a leaf node, just delete. Under other more complicated cases, we try to move the deletion down to a leaf node. Swap the aimed element with the right most element of its left child or the left most element of its right child until the aim is at the bottom and become a leaf.
 
 ## Divide and Conquer: van Emde Boas Trees
 
-The goal is to maintain n elements among $\left\{0,1,...,u-1\right\}$, a set of continuous integers,with operations of insertion and deletion with complexity $\theta(\log_2\log_2n)$. When doing binary search on the levels of binary trees, we get:
+The goal is to maintain n elements among $\left\{0,1,...,u-1\right\}​$, a set of continuous integers,with operations of insertion and deletion with complexity $\theta(\log_2\log_2n)​$. When doing binary search on the levels of binary trees, we get:
 $$
 T(k)=T(\frac{1}{2}k)+O(1),k=\log_2u
 $$
@@ -440,3 +452,129 @@ Under this model, there may be some occasionally larger complexity, while it doe
 - Allow an operation to store credit in bank account.
 - Allow an operation to pay for time using credit in bank balance.
 
+## Randomization
+
+The algorithm generate a random number or a vector based on a certain range and the process depends on the random variable. On the same input on different executions, there may be different number of steps or outputs. Sometimes the output is probably incorrect according to a probability, in which case, the result must be checked and decide if it should run again. 
+
+### Matrix Product: Freivald’s Algorithm
+
+Choose a random binary vector r[1,…,n], such that the probability of the choice of value of the binary vector element is equal, namely, $P(r[i]=1)=\frac{1}{2}$ independently.
+
+```
+for i = 1,...,n:
+	if A*Br=Cr:
+		output yes
+	else:
+		output no
+```
+
+### Quick Sort
+
+For a n-element array A,
+
+- Divide
+  - Pick a pivot element x in A
+  - Partition the array into subarrays
+- Conqure
+  - Recursively sort subarrays the less and the greater part
+- Combine
+  - Trivial
+
+#### Banic
+
+Pick the pivot x to be the first of the last element of the array, with equal probability. Do partition based on that given x on $O(n)​$ time. The worst case, as before, is to sort a reversely arranged array and one part of the partition result has no element, where the time complexity is:
+$$
+T(n)=T(0)+T(n-1)+\theta(n)=\theta(n^2)
+$$
+The randomized process ensures a general balance case for the partition.
+
+#### Median Selection
+
+The median finding process has $\theta( n)$ complexity, while the whole process becomes:
+$$
+T(n)=2T(\frac{n}{2})+\theta(n)
+$$
+
+#### Randomized and Paranoid Quick Sort
+
+The pivot x is chosen at random from array A. Expected time complexity is $O(n\log_2n)$. Furthermore, choose the pivot to be the random element from A repeatedly, until the result of partition is balanced enough:
+$$
+|L|\le\frac{3}{4}|A|,|G|\le\frac{3}{4}|A|
+$$
+The partition is good with 50% probability.
+
+### Skip List
+
+For a doubly directed linked list, the complexity of searching is $O(n)$ and the sorting complexity is $O(n)$. If we have 2 sorted linked list, some elements of one of which is directly linked to the other on the top.
+
+![1553775891967](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1553775891967.png)
+
+Consider this as a transport map of streets. If it is previously known to me that I am going to distant places, I might make decisions to travel by express, namely, the linked list on the top, instead of taking buses, stopping at every station. To view this special linked list as a data structure of its own being, we analyze the complexity of searching operation.
+
+#### Searching
+
+- Walk right in the top linked list L1, until going right would go too far.
+- Walk down to the bottom list L0.
+- Walk right in L0 until the target is found.
+
+There are some obvious properties:
+
+1. Cost: $|L_1|+\frac{|L_0|}{|L_1|}$
+2. The cost is minimized when equals: $|L_1|^2=|L_0|=n$.
+
+Push the logic to extreme, the complexity may be simpler. If the number of linked lists is 3, the complexity  becomes $3n^\frac{1}{3}$, and so on, $kn^\frac{1}{k}$. When we take $k$ to be $\log_2n$, the complexity becomes $2\log_2n$, when the data structure gets to look like a tree. Thus, a skip list is formed. By the way, it is crucial that the linked lists are sorted.![1553777945493](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1553777945493.png)
+
+#### Insertion
+
+- Search for the proper position of the inserting element x.
+- Always insert into the bottom list.
+- At each insertion, flip the coin (take one half of probability) to decide whether duplicate the element to the next level. Stop if encounters negative in a flip of a coin. If continue to get positive all the way up to the top of the lists, create a new list if necessary.
+
+The worst case is infinite complexity, in which case we keep flipping coins every time, which must be prevented by some mechanism.
+
+#### Deletion
+
+A deletion has to happen in all levels for the same element.
+
+#### Warm up Lemma
+
+The number of levels in a n-element skip list is $O(\log_2n)$ or $O(c\log_2n)$ with high probability. The probability is in a form of $1-\frac{1}{n^\alpha}$, where $\alpha$ is related to the $c$ mentioned above. Here we prove this lemma.
+
+In order to find the probability of correctness, we first look at the probability of failure, which says the number levels of n-element skip list is not less or equal to $c\log_2n$, which is the probability that some elements get promoted in time complexity greater than $c\log_2n$ times. By using the union bound, we claim the probability is bounded by the probability of some certain element gets promoted times n is greater than $c\log_2n$ times.
+$$
+P\{\text{some elemets get promoted > }c\log_2n\}\le n\times P\{\text{element gets promoted }>c\log_2n\}
+$$
+The probability of some certain element gets promoted greater than $\log_2n$ times is simply $(\frac{1}{2})^{c\log_2n}$, hereby the proof is finished. The probability of … is bounded by $\frac{1}{n^{c-1}}$.
+
+#### Theorem of Searching
+
+Any search in an n-element skip list costs $O(\log_2n)$ w.h.p. (with high probability). Here we apply the technical procedure of analyzing search backwards.
+
+- Backwards search starts or ends at a node in the bottom list.
+- At each node visited,
+  - If the node was not promoted higher (tails here), we go to (came from) the left side.
+  - If the node was promoted higher (heads here), we go (came from) up side.
+- Stop (start) when we reach the top (bottom) level.
+
+As we may see from the process illustrated above, backwards search makes “up” moves and “left” moves each with probability $\frac{1}{2}$. The number of moves going “up” is less or equal to $c\log_2n$ with high probability. The total number of moves correspond to the number of moves until getting $c\log_2n$ “up” moves. In other words, the process of flipping coins does not stop until $c\log_2n$ heads are obtained, with high probability.
+
+The theorem is hereby proved by Chevnoff’s Theorem. Let $X$ be the sum of $X_i$s, where:
+$$
+P\{X_i=1\}=p,P\{X_i=0\}=1-p,1\le i\le m
+$$
+Then, for all $r>0$:
+$$
+P\{X\ge E[X]+r\}\le e^{-\frac{2r^2}{m}}
+$$
+
+### Perfect Hash
+
+#### Dictionary Problem
+
+Dictionary is a kind of abstract data type. It maintains a set of items, each with a key subject to:
+
+1. insert(item): assume the key is not already in the table.
+2. delete(item)
+3. search(item): find item with that key.
+
+A easy and good enough way of implementation is hashing with chain, which has amortizingly constant time complexity.
