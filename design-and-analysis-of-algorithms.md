@@ -578,3 +578,81 @@ Dictionary is a kind of abstract data type. It maintains a set of items, each wi
 3. search(item): find item with that key.
 
 A easy and good enough way of implementation is hashing with chain, which has amortizingly constant time complexity.
+
+#### Randomized
+
+There are 2 kinds of randomization. In all cases, there are random inputs. However, inputs are not generally controlled by programmers. Therefore, we want our algorithms to be “actually” random by themselves.
+
+#### Arbitrary Selection of Hash Functions
+
+When building a hash table, instead of sticking to a single hash function, we choose a hash function from some set randomly, each time we rebuild or extend our hash table, which is the meaning of word universal. Similarly, the set of hash functions must have the property of:
+$$
+\forall k,\exist m,P\{h(k_i)=h(k_j)\}\le\frac{1}{m},h\in H
+$$
+There is a theorem requiring proving. For n arbitrary distinct keys for random $h\in H$, where $H$ is universal, there is, 
+$$
+E[collisions]\le1+\alpha
+$$
+The proof is easy. Suppose the keys are $k_1,...,k_n$, let indicator $I_{ij}$ be:
+$$
+I_{ij}=\begin{cases}
+1&h(k_i)=h(k_j)\\
+0&otherwise
+\end{cases}
+$$
+Hence:
+$$
+E[collisions]=E[\sum_{i\ne j}I_{ij}+I_{ii}]=1+\sum_{i\ne j}E[I_{ij}]\le \frac{n}{m}+1
+$$
+If we can find a universal family, we can guarantee a good performance in hashing with chains.
+
+#### Universal Hash Family
+
+Obviously, a bad universal family is a set of all hash functions, for it takes too much time and space. Instead of that naive and lazy idea, we choose a family called “Dot-product Family”. It is presumed that these terms are held to be true.
+
+- $u$ is the size of the family.
+- Assume m is prime, while doubling numbers we add a tiny change to achieve this.
+- Assume $u=m^r$ for integer $r$.
+- View key $k$ in base m, $k=(k_0,k_1,...,k_{r-1}),k_i\in[0,m-1]$.
+
+Then, for key $a=(a_0,a_1,...,a_{r-1})$, define $h_a(a\cdot k)\mod{m}=\sum_{i=0}^{r-1}a_ik_i$, and the family is:
+$$
+H=\{h_a|a\in\{0,1,...,u-1\}\}
+$$
+Choose $a$ uniformly random, and the randomization is achieved.
+
+Another kind of family is defined as follows:
+$$ {_{ab}
+h_{ab}(k)=((ak+b)\mod{p})\mod{m}
+$$
+where $a,b$ are uniformly random values. We hereby prove the previous one.
+
+#### Proof Example
+
+We here prove the first family holding such properties as that it is universal.
+
+For a given $k\ne k'$, for a certain position if $d$ digit, the 2 keys differ from each other, $k_d\ne k_d'$.
+$$
+\begin{align*}
+P(h_a(k)=h_a(k'))\\
+&=P(\sum_{i=0}^{r-1}a_i(k_i-k_i')=0\mod{m})\\
+&=P(a_d(k_d-k_d')+\sum_{i\ne d}a_i(k_i-k_i')=0\mod{m})\\
+&=P(a_d=-(k_d-k_d')^{-1}\sum_{i\ne d}a_i(k_i-k_i'))\\
+&=\frac{1}{m}
+\end{align*}
+$$
+
+#### Static Dictionary Problem
+
+- Given n keys up front and support search.
+- Using perfect hashing.
+  - $O(1)$ worst-case time for search.
+  - $O(n)$ worst-case space to store.
+  - Nearly linear time to build with high probability.
+
+In order to store a more stable data structure, instead of hash with chains, we hash with hash tables. Namely, change the linked lists into hash tables.
+
+1. Pick a certain hash function $h_1:\{0,1,...,u-1\}\rightarrow\{0,1,...,m-1\},m=\theta(n)$ from a universal hash family.
+2. For each slot $j\in\{0,1,...,m-1\}$,
+   1. $l_i$ is the number of keys among n hashing to the slot.
+   2. Pick $h_{2,j}:\{0,...,u-1\}\rightarrow\{0,...,l_j^2-1\}$ from the universal family.
