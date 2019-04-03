@@ -656,3 +656,99 @@ In order to store a more stable data structure, instead of hash with chains, we 
 2. For each slot $j\in\{0,1,...,m-1\}$,
    1. $l_i$ is the number of keys among n hashing to the slot.
    2. Pick $h_{2,j}:\{0,...,u-1\}\rightarrow\{0,...,l_j^2-1\}$ from the universal family.
+
+### Data Structure Augmentation
+
+#### Easy Tree Augmentation
+
+The goal of such a data structure is to store an extra field for some function $f(\text{subtree rooted at }x)$ at each node x in $x.f()$. It is not always possible, while it is possible when suppose x.f can be computed in constant time from x or the children of x or the f of the children of x. If modify set $S$ of nodes, then it costs the number of ancestors of $S​$ at most to update f fields. The rotation in an AVL tree may trigger some change in the f fields, therefore the modification begins at the lowest level.
+
+#### Order-statistic Trees
+
+- ADT/interface
+  - insert(x), delete(x), successor(x)
+  - rank(x): the index of the key in sorted order of all element.
+  - select(k): find key of rank k.
+  - Also true for other tree structures other than binary trees.
+
+All operation is by $O(\log_2n)$. If use easy tree augmentation with f(subtree) = number of nodes in subtree.
+
+```
+x.f = 1 + sum(children.f for children in x.children)
+```
+
+In AVL:
+
+```
+rank = x.left.size + 1
+```
+
+x.left means all of the left parts, not only children.
+
+```
+select(i):
+	x = root
+	while i > 0
+        rank = x.left.size + 1
+        if i is rank:
+            return x
+        if i < rank:
+            x = x.left
+        if i > rank:
+            x = x.right
+        i -= rank
+```
+
+If we insert a element smaller than all other existing elements, the method of caching rank would not be valid and we have to change every notion of rank for each nodes. Similarly, it is hard to maintain depth and other properties of nodes and we tend to give up on those things.
+
+#### Level-linking 2-3 Trees
+
+In addition to the existing parent-child directed pointers, we add links between the nodes on the same level. In other words, we store level-left and level-right pointers for each node. The purpose of such modification on 2-3 Trees is to achieve the property of Finger Search, which means searching nearby elements is extremely fast.
+$$
+T(n)=O(\log_2|rank(x)-rank(y)|)
+$$
+When y is the root and x is leftmost element of the right subtree of y or rightmost element of the left subtree of y, the difference in index is only 1, while the difference in actual distance is quite large. To solve such a problem, we make augment to store min and max of subtrees at each node.
+
+In this case, for insert operations, we no longer split the node into exact half and let the middle one go up to the parent. Instead, we split the node into “almost” half, with sizes 2 and 1, and if a node has 4 children, we split the node by half, each takes 2 children.
+
+```
+search(x from y):
+	v = leaf containing y
+    while v is not x:
+        if v.min <= x <= v.max:
+            downward search in v's subtree
+        elif x < v.min:
+            v = v.level_left
+        elif x > v.max:
+            v = v.level_right
+        v = v.parent
+	return v
+```
+
+The code satisfy the time complexity requirement.
+
+#### Orthogonal Range Search
+
+For a given set of points under a certain dimensional space, give a orthogonal region (rectangle, etc) and list all of the points inside the region. The goal is summarized to be:
+
+Process n points in d-D to support query, a given box, and find the number of points in the box and the kth point in the box. The output is of size $\theta(k)$.
+
+##### 1D Version
+
+The query is an interval. For 1D case, many structures concerning sorting is available, such as sorting operation, BST, 2-3 tree with level links, etc. However, the best way of doing this is to build a perfect BST and perform range query search. The process is as following.
+
+```
+range_query([a, b]):
+	search(a)
+	search(b)
+	trim common prefix...
+```
+
+The trim tick is to return all nodes between a and b, including a and b. The finding process can be separated into 2 parts. Searching start from both a ad b, going upward, until they reach a common root. For the lower bound, as we go upward, if the child is the left child of the parent, store the parent, and if not, ignore the parent and proceed. The stored nodes and the number of elements in the interval is the sum of the size of all of the nodes as root of a subtree. The number of nodes we may get is $\theta(\log_2n)$, which is height.
+
+##### 2D Version
+
+Consider a single dimension at one time, and the process is similar to the 1D version.
+
+## Dynamic Programming
+

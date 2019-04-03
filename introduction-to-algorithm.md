@@ -45,8 +45,8 @@ The worst case goes through all positions. In most cases, we prefer the starting
 
 #### A Better 2D Version
 
-* Pick the middle column $j = \frac{m}{2}$. Find global max on column $j$ at $\(i,j\)$.
-* Pick left columns if $a\(i,j-1\)gt;a\(i,j\)$. If $a\(i,j\)\le a\(i,j-1\),a\(i,j+1\)$, we have a peak.
+* Pick the middle column $j = \frac{m}{2}$. Find global max on column $j$ at $(i,j)$.
+* Pick left columns if $a(i,j-1)\ge a(i,j)$. If $a(i,j)\le a(i,j-1),a(i,j+1)$, we have a peak.
 * When having a single column, find the max and done.
 
 Time complexity:
@@ -95,7 +95,7 @@ Suppose that a certain array, 1D or 2D, does not have a peak, which means there 
 * Document: sequence of words.
 * Word: string of alphanumeric characters A-Z, 0-9.
 * Idea: sharing words
-  * Think of a document as a vector $D\[w\] =$ \#occurrences of $w$ in D, where $w$ stands for words in the document. Each word has frequency of itself. Then define distance of the documents to be: $$d(D_1,D_2) = \frac{D_1 \cdot D_2}{|D_1||D_2|}$$ , as an angle between the documents.
+  * Think of a document as a vector $D[w] =$ \#occurrences of $w$ in D, where $w$ stands for words in the document. Each word has frequency of itself. Then define distance of the documents to be: $$d(D_1,D_2) = \frac{D_1 \cdot D_2}{|D_1||D_2|}$$ , as an angle between the documents.
 * Algorithm:
   * Split documents into words;
   * Complete word frequencies;
@@ -127,7 +127,7 @@ Suppose that a certain array, 1D or 2D, does not have a peak, which means there 
   * Swap copies;
   * Swap pointers;
   * ...
-* Given that compare cost is much larger than swap cost, the worst case scenario is as mentioned above. To actually make the given assumption happen, instead of swapping the object through the sorted array, do a binary search on the sorted array and find the position quickly. After finding the position, in a array structure where memory is stored continuously, the insert operation is not constant time, going back to the case of $$\theta (n^2)$$ . There is nothing more that we can do to improve this algorithm.
+* Given that compare cost is much larger than swap cost, the worst case scenario is as mentioned above. To actually make the given assumption happen, instead of swapping the object through the sorted array, do a binary search on the sorted array and find the position quickly. After finding the position, in a array structure where memory is stored continuously, the insert operation is not constant time, going back to the case of $$\theta (n^2)​$$ . There is nothing more that we can do to improve this algorithm.
 
 ### Merge Sort
 
@@ -138,11 +138,10 @@ Suppose that a certain array, 1D or 2D, does not have a peak, which means there 
   T(n) = C_1 + 2T(\frac{n}{2}) + C_2n = \theta(n\log_2n)
   $$
 
-* Merge Sort algorithm needs $\theta \(n\)$ auxiliary space, which makes it not a in-place sorting algorithm. It is possible that merge sort could happen in-place but not practical.
+* Merge Sort algorithm needs $\theta (n)​$ auxiliary space, which makes it not a in-place sorting algorithm. It is possible that merge sort could happen in-place but not practical.
 
-  \*\*\*\*
 
-### **Heap**
+### Heap
 
 * Implements a set S of elements, each of which are associated with a key.
   * insert
@@ -158,7 +157,7 @@ Suppose that a certain array, 1D or 2D, does not have a peak, which means there 
 #### **Operations**
 
 * build\_max\_heap: produce a max heap from an unordered array. The way of achieving such an operation is through a method called Max/min-heapify. Namely, Correct a single violation of a heap property.
-  * Assume that the tree rooted at $left\(i\)$ and $right\(i\)$ are max heaps;
+  * Assume that the tree rooted at $left(i)$ and $right(i)$ are max heaps;
   * In order to correct the single mistake, swap the roots with their largest child along the tree. 
 
     $$
@@ -167,7 +166,7 @@ Suppose that a certain array, 1D or 2D, does not have a peak, which means there 
 
   * In every insert operation throughout the build process, put the node to the bottom and heapify to correct the mistake.
   * Time complexity:
-    * Observe max\_heapify takes constant time for nodes that are above the leaves and in general $O\(l\)$ time for nodes that are $l$ levels above the leaves.
+    * Observe max\_heapify takes constant time for nodes that are above the leaves and in general $O\(l\)​$ time for nodes that are $l​$ levels above the leaves.
     * $\frac{n}{4}$ nodes with level 1, $\frac{n}{8}$ with level 2, ..., 1 node in level $\log\_2n$.
 
 #### **Problem: Airport with a Single Runway**
@@ -184,7 +183,7 @@ Suppose that a certain array, 1D or 2D, does not have a peak, which means there 
 * Reserve request for landings, landing time t specified;
 * Add t to the set T if no other landing are scheduled with k mins;
 * Remove from set R after plane lands;
-* All of these operations in $\theta\(\log\_2n\)$ time.
+* All of these operations in $\theta(\log_{2}n)$ time.
 
 #### **Abstraction**
 
@@ -195,7 +194,7 @@ The problem can be stated as following:
 
 #### **Invariant**
 
-For all nodes x, if y is in the left subtree of x, $key\(y\)\le key\(x\)$. If y is in the right subtree of x, $key\(y\)\ge key\(x\)$.
+For all nodes x, if y is in the left subtree of x, $key(y)\le key(x)$. If y is in the right subtree of x, $key(y)\ge key(x)$.
 
 Insert time complexity:
 
@@ -216,7 +215,7 @@ Add another attribute to every node, which starts at 0 and add by 1 each time an
 
 ### Heights
 
-Note: $$Height = Longest\text{ } Path\text{ } to\text{ } Bottom$$ If:
+Note: $$Height = Longest\text{ } Path\text{ } to\text{ } Bottom​$$ If:
 
 $$
 Height = \log_2n
@@ -237,7 +236,7 @@ $$
 
 #### **Property to be Maintained**
 
-Define: $N\_h$ = min nodes in an AVL tree of height $h$.
+Define: $N_h$ = min nodes in an AVL tree of height $h$.
 
 $$
 N_{O(1)} = O(1),\qquad N_h = 1 + N_{h-1} + N_{h-\alpha}
@@ -627,11 +626,19 @@ Run Dijkstra on both direction. Drop the traversed vertices at each step. When s
 
 ### Basic Idea
 
-1. Define subproblems.
-2. Guess a part of the result.
-3. Recurrence
-4. Recurse + Memorize or Bottom-up.
-5. Original problem.
+Dynamic programming is to memorized and reuse the solutions to some subproblems that help solve the problem. Dynamic programming is basically memorizations and iterations, to avoid duplicating work of the same kind.
+
+- DP = “careful brute force”
+- DP = guessing + recursion + memorization
+- DP = shortest paths in some topological DAG
+
+1. Define subproblems -> number of subproblems
+2. Guess a part of the solution -> number of guesses
+3. Related subproblem solutions -> time per subproblem
+4. Recurse + Memorize or Bottom-up -> check the subproblem recurrence is acyclic i.e. has topological order and total time
+5. Original problem solved -> extra time to collect and conclude from the subproblems
+
+time = number of subproblems * time/subproblem
 
 ### Example: Fibonacci Numbers
 
@@ -665,6 +672,8 @@ $$
 
 Compute each Fibonacci term and store it for later computation.
 
+
+
 #### Bottom Up DP
 
 $$
@@ -688,16 +697,17 @@ unsigned int fib(unsigned int n){
 }
 ```
 
-This code takes constant memory and linear time. It does the same thing as Memory version and takes less memory. It topologically sort the subproblem dependency DAG.
+This code takes constant memory and linear time. It does the same thing as Memory version and takes less memory. It is a topologically sort the subproblem dependency DAG.
 
 ### Example: Shortest Path
 
+When not knowing the answer, try some guesses and try all of them and take the best one. In the shortest path problem, we first guess to which way does the first step goes. There would be infinite time for graphs with cycles. For a DAG, we follow the simple rule of calculating dynamic programming time.
 
+The time for a subproblem is the in-degree of the specified vertex plus 1. The 1 is for Sum up the total time of all subproblems and the result is $\theta(E+V)$.
 
 ### Example: Text Justification
 
-In some text-editing software or a pdf-printer, the characters that the user enters into the screen must be presented in a good-looking way. These softwares do not want the texts to be too loose in each lines. 
-
+For a given text, split text into “good” lines. We can only cut between word boundaries. The text is taken as a list of words. Define some “word badness”:
 $$
 badness(i,j)=\begin{cases}
 (page\_width-total\_width)^N & N=\text{2 or 3 or others}\\
@@ -705,8 +715,7 @@ badness(i,j)=\begin{cases}
 \end{cases}
 $$
 
-1. Subproblems:
-   * Try all 
+1. Subproblems. Once the beginning of the second line is defined, we have the remaining words as “suffixes” of the original list as words[i:].
 
 ### Example: Guitar Fingering
 
