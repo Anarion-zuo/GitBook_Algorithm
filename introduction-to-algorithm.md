@@ -640,13 +640,14 @@ Dynamic programming is to memorized and reuse the solutions to some subproblems 
 
 time = number of subproblems * time/subproblem
 
+2 kinds of guessing:
+
+1. Guessing which subproblems to use to solve bigger subproblems.
+2. Add more subproblems to guess/remember more features of the solution.
+
 ### Example: Fibonacci Numbers
 
 #### Definition
-
-
-
-
 
 $$
 F_1=F_2=1,F_n=F_{n-1}+F_{n-2}
@@ -707,7 +708,7 @@ The time for a subproblem is the in-degree of the specified vertex plus 1. The 1
 
 ### Example: Text Justification
 
-For a given text, split text into “good” lines. We can only cut between word boundaries. The text is taken as a list of words. Define some “word badness”:
+For a given text, split text into “good” lines. We can only cut between word boundaries. The text is taken as a list of words. Define some “word badness” for a line:
 $$
 badness(i,j)=\begin{cases}
 (page\_width-total\_width)^N & N=\text{2 or 3 or others}\\
@@ -715,31 +716,152 @@ badness(i,j)=\begin{cases}
 \end{cases}
 $$
 
-1. Subproblems. Once the beginning of the second line is defined, we have the remaining words as “suffixes” of the original list as words[i:].
+1. Subproblems. Guess where to start the second line. Once the beginning of the second line is defined, we have the remaining words as a “suffix” of the original list as words[i:]. The number of subproblems is n.
+2. Guesses. Guess where to start the second line. The number of choices is less than or equal to $n-i=O(n)​$, the number of the rest of the words.
+3. Recurrence. Word i is the last word of the first line. Word j is the last word of the second line, which is the goal of the algorithm. Try for all possible position to find the proper j with least badness.
 
-### Example: Guitar Fingering
-
-For a given sequence of n notes, find the best fingering, namely, the nearest finger, for each note.
-
-- Fingers 1,2,…,F, assign them to each note.
-- Difficulty measure for each transferring of note, how far does the finger have to move to get to the next node. d(p,f,q,g), how difficult it is to transfer from pressing note p with finger f to pressing note q with finger g.
-
-1. subproblems = how to play notes[i:] when use f for notes[i]
-2. guess: finger g for notes[i+1]
-3. recurrence: 
-
-```
-DP(i,f) = min(DP(notes[i+1],g)+d(notes[i],f,notes[i+1],g)) for g in 1,...,F)
+```python
+DP(i):
+    for j in range(i + 1, n + 1):
+        min(DP(j) + badness(i, j))
 ```
 
-4. topo-order:
+​	Try for every possible j to minimize the rest of the DP and the badness of the certain j. DP(j) is to determine the justification for the rest of the text. Time per subproblem is $O(n)$.
+
+4. Check topological order. i = n, n-1, …, 0, null. Total time $O(n^2)​$.
+5. Original problem is DP(null) = 0.
+
+### Parent Pointers
+
+Remember which guesses were the found best solution.
+
+For the text justification case, parent[i] = argmin(…) = j value. 0 is where the first line begins. Parent(0) is where the second line begins. And so on.
+
+### Parenthesization
+
+Optimal evaluation of associative expression. Such as matrix multiplication.
+$$
+\begin{pmatrix}.\\.\\.\end{pmatrix}\times\begin{pmatrix}...\end{pmatrix}\times\begin{pmatrix}.\\.\\.\end{pmatrix}
+$$
+There is a huge difference for different order of multiplication. Now, let us look at a example of a bunch of matrix multiplication, $A_0A_1...A_{n-1}$.
+
+#### Subproblem
+
+Optimal evaluation of $A_i...A_{j-1}$.
+
+#### Guess
+
+The right question to ask is what is the outermost/last multiplication. Namely, find $k​$, for $(A_0...A_{k-1})\times(A_k...A_{j-1})​$. The number of choices is the number of all matrices.
+
+#### Recurrence
+
+```
+DP(i, j) = min(
+	DP(i, k) + DP(k ,j) + cost of A[i:k]*A[k:j]
+	for k in range(i + 1, j)
+)
+```
+
+### Example: Edit Distance
+
+For given 2 strings x and y, what is the cheapest possible sequence of character edits to turn x to y? The operations of character editing may be insert, delete, or replace letters. Some cost scores must be specified according to the frequency of the types of duck type.
+
+#### Subproblem
+
+The subproblem are going to be the suffix of x and the suffix of y, which is for all i and j, x[i:] and y[j:]. The number of subproblems is $\theta(|x||y|)$, because we must look at all pairs of all suffixes of x and y.
+
+#### Guesses
+
+There are 3 different possible valid operation when encountering different character.
+
+1. Replace x[i] with y[i]
+2. Insert y[i] before x[i]
+3. Delete x[i] in x
+
+#### Recurrence
+
+DP(i, j) = min(
+
+- cost of replacement x[i]->y[i] + DP(i + 1, j + 1),
+- cost of insert y[i]+ DP(i, j + 1),
+- cost of delete x[i] + DP(i + 1, j)
+
+)
+
+#### Topological Order
+
+```
+for i = |x|,...,0:
+	for j = |y|,...,0:
+		...(operations above)...
+```
+
+The process can be represented by a matrix consisting of |x| and |y| as column and row. A single operation in the whole process is looking at the right, cost of insertion, bottom, cost of deletion, and right-bottom, cost of replacement, and deciding which direction should the process pointer go next. It is a shortest path of DAG.
+
+The running time of the subproblem is constant. The total time is $\theta(|x||y|)$.
+
+#### Subquestion with Same Idea
+
+Another similar problem is the longest common subsequence problem, which finds the longest common subsequence, which is not necessarily continuous in the original string,  in 2 different strings. For the latter problem, we may use insert or delete operations as little as possible and cannot use replace operations. Therefore, we can name the cost of the insert and delete operations to be 1 and replacement to be infinity.
+
+### Example: Knapsack
+
+We have a list of items with a integer size $s_i$ and a value $v_i$. The total size of the knapsack is $S$. We want to find a subset of items, whose total size is less than or equal to the size of the knapsack and the sum of values is maximized.
+
+#### Subproblem
+
+The subproblem is the problem of suffix i of items and remaining capacity $X\le S$. The number of subproblems is $\theta(nS)$.
+
+#### Guess and Choices
+
+Is item i in the subset or not/Should the item be included or not? Thus has 2 choices.
+
+```
+DP(i, X) = max(DP(i + 1, X), DP(i + 1, X - s_i) + v_i)
+```
+
+### Example: Piano/Guitar Fingering
+
+For a given sequence of n notes, find fingering for each note. Regard a note as a single note, namely, one finger pressing one note each time, for fingers 1,…,F. We want to assign each the fingers to the notes. Define a difficulty measure d(p, f, q, g), how hard it is for finger f on note p to be transfered the state of finger g on note q.
+
+#### Naive Version
+
+Subproblem is how to play notes[i:]. The guesses are which finger to use for notes[i]. Thus set up the recurrence.
+
+```
+DP(i) = min(DP(i + 1) + d(i, f, i + 1, ?) for f in 1,...,F)
+```
+
+There is a ? in the process which means the next finger cannot be determined. We need more subproblems.
+
+#### More Subproblems
+
+Take the subproblem to be how to play notes[i:] when using f for [i]. Guess finger g for notes[i + 1].
+
+```
+DP(i, f) = min(DP(i + 1, g) + d(i, f, i + 1, g) for g in 1,...,F)
+```
+
+The topological order:
 
 ```
 for i in reversed(range(n)):
 	for f in 1,...,F:
-		DP(i,F)
+		...
 ```
 
+The original problem should decide which finger to be for the first note.
+
+```
+min(DP(0, f) for f in 1,...,F)
+```
+
+![1554451751102](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1554451751102.png)
+
+Time complexity is:
+$$
+T(n)=nF\theta(F)=\theta(nF^2)
+$$
 
 
 ## Computational Complexity
