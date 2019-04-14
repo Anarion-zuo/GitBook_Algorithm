@@ -10,15 +10,10 @@
 
 ### Toy: Peak Finding
 
-* The problem is about finding peaks if exists in an array with a certain length. Peak is defined as:
-
-  ```text
-    For array a[], position i is a peak if and only if $a[i-1] \le a[i]$ and $a[i+1]\le a[i]$. For the cases of edges, only compare the single side.
-  ```
-
-  By looking at the previous and latter position, peaks can be detected. 
+* The problem is about finding peaks if exists in an array with a certain length. Peak is defined as: For array a[], position i is a peak if and only if $a[i-1] \le a[i]$ and $a[i+1]\le a[i]​$. For the cases of edges, only compare the single side.
 
 
+By looking at the previous and latter position, peaks can be detected. 
 
 If we only want to tell the existence of a peak, or find only one peak, we might apply the divide and conquer method. First decide whether the middle position satisfies to be a peak, then apply the function upon the left half and the right half.
 
@@ -57,7 +52,7 @@ $$
 
 #### Argue that peaks have to exist.
 
-Suppose that a certain array, 1D or 2D, does not have a peak, which means there is no $$i,j$$ for $$\forall pi \in {f(i-1,j),f(i,j-1),f(i+1,j),f(i,j+1), f(i,j)}, pi \le f(i,j)$$ .
+Suppose that a certain array, 1D or 2D, does not have a peak, which means there is no $$i,j$$ for $$\forall pi \in {f(i-1,j),f(i,j-1),f(i+1,j),f(i,j+1), f(i,j)}, pi \le f(i,j)​$$ .
 
 ## Models of Computation, Document Distance
 
@@ -286,11 +281,9 @@ The operation can only be applied to AVL trees and stated as follows. For a give
 
 * For a given array, count the frequency of each number in the array and store the result in another array whose indexes correspond to the numbers in the original array.
 * ```cpp
-    '''
-    for (int i = 0; i < A.size(); ++i){
-        Count[A[i]]++;
-    }
-    '''
+  for (int i = 0; i < A.size(); ++i){
+      Count[A[i]]++;
+  }
   ```
 
   \*\*\*\*
@@ -352,7 +345,7 @@ The operation can only be applied to AVL trees and stated as follows. For a give
 #### Hash Function
 
 1.  Division Method: $h\(k\) = k \mod m$, where m is mentioned above.
-2. Multiplication Method: $h\(k\) = \(\(ak\)\mod 2^w\) &gt;&gt; \(w - r\)$, where $k$ is w-bit. This method can be understood as a division method under binary case, or taking the certain binary bits of the input.
+2. Multiplication Method: $h(k) = ((ak)\mod 2^w)(w - r)$, where $k​$ is w-bit. This method can be understood as a division method under binary case, or taking the certain binary bits of the input.
 3. Universal Hashing: $h\(k\) = \(\(ak+b\)\mod p\)\mod m$
 
 ### Table Doubling, Karp-Rabin

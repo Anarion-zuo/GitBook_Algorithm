@@ -115,3 +115,321 @@ The noise margin is defined to be $V_{IL}-V_{OL}$ or $V_{OR}-V_{IR}$. It simply 
 
 ## CMOS Technology
 
+
+
+## Synthesis of Combinational Logic
+
+### Functional Specifications
+
+There are many ways of specifying the function of a combinational device, for example: If C is 1, copy B to Y, otherwise copy A to Y. We want a way of precise implementation instead of descriptions in words. Therefore, we construct Truth Table for a boolean function. Concise alternatives:
+
+- Truth Tables are a concise description of the combinational system’s function.
+- Boolean expressions form an algebra whose operations are AND (multiplication), OR (addition), and inversion (overbar).
+
+To construct a boolean function based on a truth table, we simply take every row with output 1 of the truth table and sum(or) them together. For example:
+
+| C    | B    | A    | Y    |
+| ---- | ---- | ---- | ---- |
+| 1    | 1    | 0    | 1    |
+
+$$
+Y=CB\bar A
+$$
+
+The whole table:
+
+| C    | B    | A    | Y    |
+| ---- | ---- | ---- | ---- |
+| 0    | 0    | 0    | 0    |
+| 0    | 0    | 1    | 1    |
+| 0    | 1    | 0    | 0    |
+| 0    | 1    | 1    | 1    |
+| 1    | 0    | 0    | 0    |
+| 1    | 0    | 1    | 0    |
+| 1    | 1    | 0    | 1    |
+| 1    | 1    | 1    | 1    |
+
+$$
+Y=\bar C\bar BA+\bar C BA+CB\bar A+CBA
+$$
+
+When building circuits implementing boolean functions, we use multiple gates to construct a larger gate with more inputs.
+$$
+Z=A\cdot B\cdot C=(A\cdot B)\cdot C
+$$
+![1555144824018](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1555144824018.png)
+
+And the tree structure is better.
+
+## Introduction
+
+- Software Engineering Problem
+  - Turn hardware/software quirks to get what programmers want/need
+  - Optimize for convenience, utilization, security, reliability, etc…
+- For any OS area (e.g. file systems, virtual memory, networking, scheduling)
+  - What is the hardware interface? (physical reality)
+  - What is the application interface? (nicer abstraction)
+- Problem: Run multiple applications in such a way that they are protected from one another.
+- Goal
+  - Keep User Programs from Crashing OS
+  - Keep User Programs from Crashing each other
+  - Keep Parts of OS from crashing other parts
+- Mechanisms
+  - Address Translation
+  - Dual Mode Operation
+- Simple Policy
+  - Programs are not allowed to read/write memory of other Programs or of Operating System.
+- Address Space
+  - A group of memory address usable by something.
+  - Each program (process) and kernel has potentially different address spaces.
+- Address Translation
+  - Translate from Virtual Address (emitted by CPU) into Physical Address (of memory).
+  - Mapping often performed in Hardware by Memory Management Unit (MMU).
+
+![1555145669595](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1555145669595.png)
+
+![1555145711912](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1555145711912.png)
+
+A vulnerability exists when the map can be written by the program.
+
+### Dual Mode Operation
+
+Nowadays, hardware provides at least 2 modes:
+
+- Kernel mode (or “supervisor” or “protected”)
+- User mode: Normal programs executed
+
+Some instructions are prohibited in user mode, such as modifying translation maps, or exceptions may be generated. In order to get into kernel mode, the process has to call a system call and run a special process “trap”, setting mode bit to 0, and the system call will be executed.
+
+## Concurrency
+
+- “Thread” of execution
+  - Independent Fetch/Decode/Execute loop
+  - Operating in some Address space
+- Uniprogramming: one thread at a time
+  - MS/DOS, early Macintosh, Batch processing
+  - Easier for operating system builder
+  - Get rid of concurrency by defining it away
+  - Does this make sense for personal computers?
+- Multiprogramming: more than one thread at a time
+  - Multicis, Unix/Linux, OS/2, Windows NT/2000/XP, Mac OS X
+  - Often called “multitasking”, but multitasking has other meanings
+- The basic problem of concurrency involves resources:
+  - Hardware: single CPU, single DRAM, single I/O devices
+  - Multiprogramming API: users think they have exclusive access to shared resources
+- OS Has to coordinate all activity
+  - Multiple users, I/O interrupts,…
+  - How can it keep all these things straight?
+- Basic Idea: Use Virtual Machine abstraction
+  - Decompose hard problems into simpler ones
+  - Abstract the notion of an executing program
+  - Then, worry about multiplexing these abstract machines
+- Dijkstra did this for the “THE system”
+  - Few thousand lines vs 1 million lines in OS 360 (1K bugs)
+
+What happens during execution?
+
+- Execution sequence
+  - Fetch Instruction at PC
+  - Decode
+  - Execute (possibly using registers)
+  - Write results to registers/memory
+  - PC = Next Instruction(PC)
+  - Repeat
+
+How can we give the illusion of multiple processors?
+
+- Assume a single processor is all we have. How do we provide illusion of multiple processors?
+  - Multiplex in time!
+- Each virtual “CPU” needs a structure to hold:
+  - Program Counter (PC), Stack Pointer (SP)
+  - Registers (Integer, Floating point, others…?)
+- How to switch from one CPU to the next?
+  - Save PC, SP, and registers in current state block
+  - Load PC, SP, and registers from new state block
+- What triggers switch?
+  - Timer, voluntary yield, I/O, other things
+
+![1555213760529](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1555213760529.png)
+
+Properties of this simple multiprogramming technique
+
+- All virtual CPUs share same non-CPU resources
+  - I/O
+  - Memory
+- Consequence of sharing
+  - Each thread can access the data of every other thread (good for sharing, bad for protection)
+  - Threads can share instructions (good for sharing, bad for protection)
+  - Can threads overwrite OS functions?
+- This (unprotected) model common in:
+  - Embedded applications
+  - Windows 3.1/Machintosh (switch only with yield)
+  - Windows 95-ME (switch with both yield and timer)
+
+Modern Technique: SMT/Hyperthreading
+
+- Hardware technique
+  - Exploit natural properties of superscalar processors multiple processors
+  - Higher utilization of processor resources
+
+![1555214244614](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1555214244614.png)
+
+Each slot represents a cycle and each block represents a unit. a colored block says the unit is currently busy. As is shown is the picture, a hyper threading processor can somehow merge the 2 threads together and make use of the blank units, thus improves time efficiency. We can therefore load 2 different threads into the processor at the same time and the processor runs a interweaving process.
+
+- Can schedule each thread as if were separated CPU
+  - However, not linear speedup
+  - If have multiprocessor, should schedule each processor first
+- Original technique called “Simultaneous Multithreading”
+  - Alpha, SPARC, Pentium 4, Power 5
+
+Program’s Address Space
+
+![1555216152804](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1555216152804.png)
+
+- What happens when you read or write to an address?
+  - Perhaps nothing
+  - Perhaps acts like regular memory
+  - Perhaps ignores writes (read only)
+  - Perhaps causes I/O operation
+  - Perhaps causes exceptions
+
+Traditional UNIX Process
+
+- Process: Operating system’s abstraction to represent what is needed to run a single program
+  - Often called a “Heavy Weight Process”
+  - Formally: a single, sequential stream of execution in its own address space
+- Two parts:
+  - Sequential Program Execution Stream
+    - Code executed as a single, sequential stream of execution
+    - Includes State of CPU registers
+  - Protected Resources
+    - Main Memory State (contents of Address Space)
+    - I/O state (i.e. file descriptors)
+- Important: There is no concurrency in a heavyweight process
+
+How do we multiplex processes?
+
+- The current state of process held in a process control block (PCB)
+  - This is a “snapshot” of the execution and protection environment
+  - Only one PCB active at a time
+- Give out CPU time to different processes (Scheduling):
+  - Only one process “running” at a time
+  - Give more time to important processes
+- Give pieces of resources to different processes (Protection):
+  - Controlled access to non-CPU resources
+  - Sample mechanisms:
+    - Memory Mapping: Give each process their own address space
+    - Kernel/User duality: Arbitrary multiplexing of I/O through system calls
+
+CPU Switching from Process to Process
+
+![1555220842447](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1555220842447.png)
+
+- This is also called a “context switch”
+- Code executed in kernel above is overhead
+  - Overhead sets minimum practical switching time
+  - Less overhead with SMT/hyperthreading, but contention for resources instead
+
+Diagram of Process State
+
+![1555221100893](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1555221100893.png)
+
+- As a process executes, it changes state
+  - new: The process is being created
+  - ready: The process is waiting to run
+  - running: Instructions are being executed
+  - waiting: Process waiting for some event to occur
+  - terminated: The process has finished execution
+
+Process Schduling
+
+![1555221370221](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1555221370221.png)
+
+- PCBs move from queue to queue as they change state
+  - Decisions about which order to remove from queues are Scheduling decisions
+  - Many algorithms possible (few weeks from now)
+
+What does it take to create a process?
+
+- Must construct new PCB
+  - Inexpensive
+- Must set up new page tables for address space
+  - More expensive
+- Copy data from parent process? (Unix fork())
+  - Semantics of Unix fork() are that the child process gets a complete copy of the parent memory and I/O state
+  - Originally very expensive
+  - Much less expensive with “copy on write”
+- Copy I/O state (file handles, etc)
+  - Medium expense
+
+Process =? Program
+
+- More to a process than just a program:
+  - Program is just part of the process state
+  - I run emacs on lectures.txt, you run it on homework.java. Same program, different processes
+- Less to a process than a program:
+  - A program can invoke more than one process
+  - cc starts up cpp, cc1, cc2, as, and ld
+
+Multiple Process Collaborate on a Task
+
+- High Creation/memory Overhead
+- (Relatively) High Context-Switch Overhead
+- Need Communication mechanism
+  - Separate Address Spaces Isolates Processes
+  - Shared-Memory Mapping
+    - Accomplished by mapping address to common DRAM
+    - Read and Write through memory
+  - Message Passing
+    - send() and receive() messages
+    - Works across network
+
+Shared Memory Communication
+
+![1555222950559](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1555222950559.png)
+
+- Communication occurs by “simply” reading/writing to shared address page
+  - Really low overhead communication
+  - Introduces complex synchronization problems
+
+Modern “Lightweight” Process with Threads
+
+- Thread: a sequential execution stream within process (Sometimes called a “Lightweight process”)
+  - Process still contains a single Address Space
+  - No protection between threads
+- Multithreading: a single program made up of a number of different concurrent activities
+  - Sometimes called multitasking, as in Ada…
+- Why separate the concept of a thread from that of a process?
+  - Discuss the “thread” part of a process (concurrency)
+  - Separate from the “address space” (Protection)
+  - Heavyweight Process is the same thing as Process with one thread
+
+Single and Multithread Process
+
+![1555224505094](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1555224505094.png)
+
+- Threads encapsulate concurrency: “Active” component
+- Address spaces encapsulate protection: “Passive” part
+  - Keeps buggy program from trashing the system
+- Why have multiple threads per address space?
+  - They would crash each other
+- Embedded systems
+  - Elevators, Planes, Medical systems, Wistwathced
+  - Single Program, concurrent operations
+- Most modern OS kernels
+  - Internally concurrent because have to deal with concurrent requests by multiple users
+  - But no protection needed within kernel
+- Network Servers
+  - Concurrent requests from network
+  - Again, single program, multiple concurrent operations
+  - File server, Web server, and airline reservation systems
+
+Thread State
+
+- State shared by all threads in process/address space
+  - Contents of memory (global variables, heap)
+  - I/O state (file system, network connections, etc)
+- State “private” to each thread
+  - Kept in TCB (Thread Control Block)
+  - CPU registers (including, program counter)
+  - Execution stack

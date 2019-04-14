@@ -752,3 +752,65 @@ Consider a single dimension at one time, and the process is similar to the 1D ve
 
 ## Dynamic Programming
 
+### Make Change
+
+We have a set of coins, holding values $1=s_1<s_2<...<s_m$. We want to make change with these coins, $MC(N)$. A straightforward idea:
+$$
+MC(N)=\min_i\{MC(N-s_i)+1\}
+$$
+which returns the number of coins used. The number of subproblems is at most $m$ and for each subproblem holding $N$ complexity. The total complexity is $O(Nm)$. However, this conclusion contradicts with the fact that the problem of knapsack is an NP problem. The mistake is made when we say the input is $N$, actually $\log_2N$. Therefore, the actual time complexity is exponential.
+
+### Rectangle Blocks
+
+We have n blocks with length, width, height, $l_i,w_i,h_i$. We want to put the blocks on each other and get a maximum height. To put block $j$ upon $i$, the requirement is $w_j<w_i,l_j<l_i$. The recursion is simple:
+$$
+RB(1,...,n)=\max_i\{h_i+RB(\text{everything except i and wider and longer})\}
+$$
+The set of input blocks of subproblems can also be expressed as:
+$$
+C^{l_i,w_i},C^{l,w}=\{j|l_j<l,w_j<w\}
+$$
+also known as compatible set. The number of subproblems is $n$ at most, for we iterate through the whole set of blocks. For each subproblem, look at each other satisfying blocks within the compatible set, and take $n$ complexity at most. At each step of subproblems, we also have to figure out whether some certain block is in the compatible set, which takes $O(n)$ time for each block and $O(n^2)$ altogether, for we must check along the original set to tell whether the blocks is in the compatible set for a specific block now processing. The total complexity is sum up to be $O(n^2)$.
+
+A better approach to this problem is to sort in advance, so that the cost of searching is saved. First sort by length then by width, or on the contrary, we have a new set of blocks, $\{1,...,n\}$. The procedure becomes:
+$$
+RB(1,...,n)=\max\{h_1+RB(C^{l_1,w_1}),RB(2,...,n)\}
+$$
+each step with 2 choices, either take the present block or not. The number of subproblems is $n$, for we search through the whole set. The sort operation happens before the subproblems, with complexity $O(n\log_2n)$.
+
+### Longest Palindromes Sequence
+
+Given a string X[1,…,n], longest palindromes is a subsequence of character. Pick the letters that form palindromes and drop those that don’t. The length of the answer would be greater or equal to 1.
+$$
+underqualified\rightarrow deified,turvoventilator\rightarrow rotator
+$$
+We want to compute $L(i,j)$, the length of longest palindromes subsequence $x[i,...,j],i\le j$.
+
+```python
+def L(i, j):
+	if i == j:
+		return 1
+	if x[i] == x[j]:
+        if i + 1 == j:
+            return 2
+        else:
+            return 2 + L(i + 1, j - 1)
+    else:
+        return max(L(i + 1, j), L(i, j - 1))
+```
+
+The complexity is:
+$$
+T(n)=\begin{cases}
+1&n=1\\
+2T(n-1)&n\ge2
+\end{cases}=2^{n-1}
+$$
+Store the $L(i,j)$ in a 2D array or build a hash table. The total complexity is $\theta(n^2)$.
+
+### Optimal BST
+
+We have a set of keys $k_1<k_2<...<k_n,k_i=i$ with each node having a weight $w_i$. Find a BST T that minimizes:
+$$
+\sum_{i=1}^nw_i(depth_T(k_i)+1)
+$$
