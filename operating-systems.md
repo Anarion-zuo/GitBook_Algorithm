@@ -433,3 +433,114 @@ Thread State
   - Kept in TCB (Thread Control Block)
   - CPU registers (including, program counter)
   - Execution stack
+
+## Thread
+
+Classification
+
+![1555226171789](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1555226171789.png)
+
+- Real operating systems have either
+  - One or many address spaces
+  - One or many threads per address space
+
+Thread State
+
+- State shared by all threads in process/address space
+  - Contents of memory (global variables, heap)
+  - I/O state (file system, network connections, etc)
+- State “private” to each thread
+  - Kept in TCB (Thread Control Block)
+  - CPU registers (including, program counter)
+  - Execution stack
+    - Parameters, Temporary variables
+    - return PCs are kept while called procedures are executing
+
+MIPS: Software conventions for Registers
+
+![1555227338123](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1555227338123.png)
+
+- Before calling procedure
+  - Save caller-saves registers
+  - Save v0, v1
+  - Save ra
+- After return, assume
+  - Callee-saves registers OK
+  - gp, sp, fp OK (restored)
+  - Other things trashed
+
+Use of Threads
+
+- A bad Example
+
+  - ```
+    main(){
+        ComputePI("pi.txt");
+        PrintClassList("clist.txt");
+    }
+    ```
+
+  - The second function is never executed, because computing pi is a infinite process.
+
+- Version of program with threads
+
+  - ```
+    main(){
+        CreateThread(ComputePI("pi.txt"));
+        CreateThread(PrintClassList("clist.txt"))
+    }
+    ```
+
+- CreateThread()
+
+  - Start independent thread running given procedure
+
+- What is the behavior here?
+
+  - Now, you should actually see the class list
+  - This should behave as if there are 2 separate CPUs.
+
+Memory Footprint of Two-Thread Example
+
+- If we stopped this program and examined it with a debugger, we would see
+  - Two sets of CPU registers
+  - Two sets of Stacks
+
+![1555228354027](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1555228354027.png)
+
+- How do we position stacks relative to each other?
+- What maximum size should we choose for the stacks?
+- What happens if threads violate this?
+- How might you catch violations?
+
+Per Thread State
+
+- Each Thread has a Thread Control Block (TCB)
+  - Execution State: CPU registers, program counter, pointer to stack
+  - Scheduling info: State (more later), priority, CPU time
+  - Accounting Info
+  - Various Pointers (for implementing scheduling queues)
+  - Pointer to enclosing process? (PCB)?
+  - Etc (add stuff as you find a need)
+- In Nachos: “Thread” is a class that includes TCB
+- OS Keeps track of TCBs in protected meory
+
+Lifecycle of Thread (or Process)
+
+![1555229844803](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1555229844803.png)
+
+- As a thread executes, it changes state:
+  - new: The thread is being created
+  - ready: The thread is waiting to run
+  - running: Instructions are being executed
+  - waiting: Thread waiting for some event to occur
+- “Active” threads are represented by their TCBs
+  - TCBs organized into queues based on their state
+
+Ready Queue And Various I/O Device Queues
+
+- Thread not running. TCB is in some scheduler queue
+  - Separate queue for each device/sigmal/condition
+  - Each queue can have a different scheduler policy
+
+![1555230244813](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1555230244813.png)

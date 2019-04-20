@@ -268,3 +268,4 @@ $$
 C=(E_n...E_1)I(E_1^T...E_n^T)\equiv LL^T
 $$
 where $L$ is certainly a lower triangular matrix, as $E​$.
+

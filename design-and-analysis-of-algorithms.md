@@ -9,7 +9,7 @@ We have resources and requests. Each of the requests corresponds to an interval 
 The strategy is to maximize the profit at each step without apparent look ahead.
 
 1. Use a simple rule to select a request $$i​$$ .
-2. Reject all requests incompatible with $$i$$ .
+2. Reject all requests incompatible with $$i​$$ .
 3. Repeat until all requests are processed.
 
 Wrong answers:
@@ -814,3 +814,57 @@ We have a set of keys $k_1<k_2<...<k_n,k_i=i$ with each node having a weight $w_
 $$
 \sum_{i=1}^nw_i(depth_T(k_i)+1)
 $$
+
+## Flow Network
+
+### Definition
+
+Directed graph, $G(V,E)$, with 2 distinguished vertices, source $s$ and sink $t$. Each edge $(u,v)\in E$, has a non-negative capacity $c(u,v)$. If $(u,v)\not\in E$, $c(u,v)=0$. The capacity signifies the maximum flow allowed upon the edge, where flow is another abstract concept extracted from problems in reality. The flow flowing into the node must equal the flow flowing out of the node. A precise definition of flow is: A flow on $G$ is a function of $f:V\times V\rightarrow \R$ satisfying:
+
+- Capacity constraint: $\forall u,v\in V,(u,v)\le f(u,v)\le c(u,v)$.
+- Flow conservation: $\forall u\in V-\{s,t\},\sum_{v\in V}f(u,v)=0$.
+- Skew symmetry: $\forall u,v\in V,f(u,v)=-f(v,u)$.
+
+Given a flow network, $G$, find a flow with maximum value on $G$.
+
+The value of a flow $f$, donated $|f|$, using implicit summation notation:
+$$
+|f|=\sum_{u\in V}f(s,u)=f(s,V)
+$$
+
+### Assumptions with Cycles
+
++ No self-loop cycles allowed.
++ For loops consisting of 2 nodes, add an extra node to the loop and make the number consisting nodes to be 3.
++ We just don’t want loops with 1 and 2 nodes.
+
+### Simple Properties and Theorem
+
+- $f(x,x)=0$
+- $f(x,y)+f(y,x)=0$
+- $f(X+Y,Z)=f(X,Z)+f(Y,Z),XY=\phi$
+
+Theorem: The out-flowing flow of the sink is what is pushed into the sink.
+$$
+|f|=f(s,V)=f(V,V)-f(V-s,V)=f(V,V-s)=f(V,t)+f(V,V-s-t)=f(V,t)
+$$
+
+### Cut
+
+A cut $(S,T)$ of a flow network $G=(V,E)$ is a partition of $V,s\in S,t\in T$. If $f$ is a flow on $G$, the flow across the cut is $f(S,T)$,which is the summation of all the flow between every pair of $S$ and $T$. The vertices at different side of the partition can be arbitrarily picked as long as it satisfies the term of having the source and sink at either sides, not necessarily separated by a certain line.
+
+The capacity of a cut $c(S,T)$ is the summation of the capacities of the edges starting from a node in $S$ and end at a node in $T$. The value of any flow is bounded by the capacity of the cut for any cut. 
+
+### Powerful Lemma
+
+For any flow $f$ and any cut $(S,T)$, we have: $|f|=f(S,T)$.
+$$
+f(S,T)=f(S,V)-f(S,S)=f(S,V)=f(s,V)+f(S-s,V)=f(s,V)=|f|
+$$
+If the flow value is strictly bounded by the capacity, finding the minimum capacity is the same process as finding the maximum flow.
+
+### Residual Network
+
+Noted as $G_f(V,E_f)$, it has strictly positive residual capacity $c_f(u,v)=c(u,v)-f(u,v)>0$. Edges in $E_f$ admit more flow. If $(u,v)\not\in E $, $c(u,v)=0$, but $f(u,v)+f(v,u)=0$. In the residual network derived from the original network, for the pairs of nodes connected with directed edges, we change the capacity of the original edge to the difference between the original capacity and the flow $c_f(u,v)=c(u,v)-f(u,v)>0$, and add a new edge pointing backward with capacity of $f(u,v)$, which is a complimentary edge.
+
+In the residual network, if we can find a augmenting path, such that it leads from the source to the sink, it says that the flow in the original network has not yet reached the maximum value, for the residual capacity, which is the minimum capacity of all traversed edges in the augmenting path, is not zero, telling us the flow of the original network can still be increased.

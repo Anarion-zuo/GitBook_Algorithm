@@ -161,8 +161,8 @@ Suppose that a certain array, 1D or 2D, does not have a peak, which means there 
 
   * In every insert operation throughout the build process, put the node to the bottom and heapify to correct the mistake.
   * Time complexity:
-    * Observe max\_heapify takes constant time for nodes that are above the leaves and in general $O\(l\)​$ time for nodes that are $l​$ levels above the leaves.
-    * $\frac{n}{4}$ nodes with level 1, $\frac{n}{8}$ with level 2, ..., 1 node in level $\log\_2n$.
+    * Observe max\_heapify takes constant time for nodes that are above the leaves and in general $O(l)​$ time for nodes that are $l​$ levels above the leaves.
+    * $\frac{n}{4}$ nodes with level 1, $\frac{n}{8}$ with level 2, ..., 1 node in level $\log_2n$.
 
 #### **Problem: Airport with a Single Runway**
 
@@ -226,7 +226,7 @@ $$
 
 ### AVL
 
-* Require heights of left and right children of every node to differ by at most $\pm 1$. Therefore AVL Trees are always balanced.
+* Require heights of left and right children of every node to differ by at most $\pm 1​$. Therefore AVL Trees are always balanced.
 * The worst case is when right subtree has height 1 more than left for every node.
 
 #### **Property to be Maintained**
@@ -252,7 +252,7 @@ $$
 
 ### **Rotation**
 
-The operation can only be applied to AVL trees and stated as follows. For a given AVL tree, take x as the up-most root and y to be x's right child. X's left subtree, y's left subtree, y's right subtree are relatively noted as A, B, and C. After the operation, the tree is going to be like as follows. Y is the up-most root. Y's left child is x, whose left and right subtrees are A and B. Y's right subtree is C. The operation mentioned here is called left rotation. Same thing goes for right rotation. By rotating the tree, we can adjust the positions of the nodes so that the tree remains balanced. 
+The operation can only bec applied to AVL trees and stated as follows. For a given AVL tree, take x as the up-most root and y to be x's right child. X's left subtree, y's left subtree, y's right subtree are relatively noted as A, B, and C. After the operation, the tree is going to be like as follows. Y is the up-most root. Y's left child is x, whose left and right subtrees are A and B. Y's right subtree is C. The operation mentioned here is called left rotation. Same thing goes for right rotation. By rotating the tree, we can adjust the positions of the nodes so that the tree remains balanced. 
 
 ## Counting Sort, Radix Sort, Lower Bounds for Sorting and Searching
 
