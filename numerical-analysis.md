@@ -79,8 +79,8 @@ Solving the equation does not mean finding inverse matrices. When we solve linea
 - Forward substitution. For each row $i=1,2,...,m$,
   - Scale row to get pivot 1.
   - For each $j>i$, subtract multiple of row $i$ from row $j$ to zero out pivot column.
-- Backward substitution. For each row $i=m,m-1,...,1​$,
-  - For each $j<i​$, zero out rest of the column.
+- Backward substitution. For each row $i=m,m-1,...,1$,
+  - For each $j<i$, zero out rest of the column.
 
 $$
 T(n)=\theta(m^2n)
@@ -125,7 +125,7 @@ $$
 A=LUP
 $$
 
-For all $A$, we can find $L,U,P​$ for such kind of factorization.
+For all $A$, we can find $L,U,P$ for such kind of factorization.
 
 ### Norm
 
@@ -177,8 +177,6 @@ $$
 \bold{cond}A\ge\frac{||A||||A^{-1}\vec x||}{||\vec x||}
 $$
 
-## Design Linear Systems
-
 ### Parametric Regression
 
 Find $a_1,...,a_n$, for:
@@ -193,13 +191,17 @@ Matrix form of representation:
 $$
 \begin{pmatrix}\vec x^{(1)T}\\\vdots\\\vec x^{(n)T}\end{pmatrix}\begin{pmatrix}a_1\\\vdots\\a_n\end{pmatrix}=\begin{pmatrix}y^{(1)}\\\vdots\\y^{(n)}\end{pmatrix}
 $$
-A famous case is the polynomial approximation or “Vandermonde system”.
+In general, we can deal with functions instead of simple numbers.
+$$
+f(\vec x)=a_1f_1(x_1)+a_2f_2(x_2)+...+a_nf_n(x_n)
+$$
+where $f_i$ can be nonlinear. For example, $f_i(x)=x^i$ forms a famous case that is the polynomial approximation or “Vandermonde system”.
 $$
 f(x)=a_0+a_1x+a_2x^2+...+a_nx^n
 $$
 The sample matrix maybe constructed by simple production.
 
-### Solution
+#### Solution
 
 $$
 A=\begin{pmatrix}\vec x^{(1)T}\\\vdots\\\vec x^{(n)T}\end{pmatrix},\vec x=\vec a,\vec b=\begin{pmatrix}y^{(1)}\\\vdots\\y^{(n)}\end{pmatrix}
@@ -207,14 +209,20 @@ $$
 
 The process of finding solution is to let $A\vec x\approx b$, which is:
 $$
-\min_\vec{x}||A\vec x-\vec b||_2\Leftrightarrow \min_{\vec x}||A\vec x-\vec b||_2^2
+A\vec x\approx b\Leftrightarrow\min_\vec{x}||A\vec x-\vec b||_2\Leftrightarrow \min_{\vec x}||A\vec x-\vec b||_2^2
 $$
 
 $$
 ||A\vec x-\vec b||_2^2=(A\vec x-\vec b)^T(A\vec x-\vec b)=||A\vec{x}||^2-2(A^T\vec{b})\cdot\vec{x}+||\vec{b}||^2\Rightarrow A^TA\vec x^*=A^T\vec b\Rightarrow\vec x^*=(A^TA)^{-1}A^T\vec b
 $$
 
-### Regularization
+Suppose, $f(\vec x)=||A\vec{x}||^2-2(A^T\vec{b})\cdot\vec{x}+||\vec{b}||^2$. By taking the gradient, we can find the minimum to the function, as is done above.
+$$
+\nabla f=-2A^T\vec b+2A^TA\vec x=\vec0
+$$
+
+
+#### Regularization
 
 When $A^TA$ is not invertible, we add a regularization term to the target function.
 
@@ -231,7 +239,7 @@ $$
 \min_{\vec x}||A\vec x-\vec b||_2^2+\alpha||\vec x||_2^2+\beta||\vec x||_1
 $$
 
-### $A^TA$ Proterty
+#### $A^TA$ Property
 
 Symmetric:
 $$
@@ -239,17 +247,17 @@ $$
 $$
 Positive Semi-definite:
 $$
-\vec x^TA^TA\vec x>0
+\vec x^TA^TA\vec x\ge0
 $$
 
-### Pivoting for SPT $C$
+### Pivoting for SPD $C$
 
 Solve $C\vec x=\vec d$ for symmetric positive definite $C$.
 $$
 C=\begin{pmatrix}c_{11}&\vec v^T\\\vec v&\tilde C\end{pmatrix}
 $$
 
-#### Forward Substitution
+#### Cholesky Factorization
 
 $$
 E=\begin{pmatrix}1/c_{11}&\vec 0^T\\\vec r&I_{(n-1)\times(n-1)}\end{pmatrix}
@@ -265,7 +273,32 @@ $$
 
 Therefore, for any $C$, $\exist E$
 $$
-C=(E_n...E_1)I(E_1^T...E_n^T)\equiv LL^T
+C=(E_n...E_1)I(E_1^T...E_n^T)\equiv LL^T,L=\prod_{i=n}^1E_i
 $$
-where $L$ is certainly a lower triangular matrix, as $E​$.
+where $L$ is certainly a lower triangular matrix, as $E$.
+
+#### Observation
+
+Suppose $L$ is represented in the form of:
+$$
+L=\begin{pmatrix}
+L_{11}&0&0\\
+\vec l_k^T&l_{kk}&0\\
+L_{31}&L_{32}&L_{33}
+\end{pmatrix}\Rightarrow LL^T=\begin{pmatrix}
+\times&\times&\times\\
+\vec l_k^TL_{11}^T&\vec l_k^T\vec l_k+l_{kk}^2&\times\\
+\times&\times&\times
+\end{pmatrix}
+$$
+Hence, we have the way of computing Cholesky factorization.
+$$
+C_{kk}=\vec l_k^T\vec l_k+l_{kk}^2,\vec v=\vec l_k^TL_{11}^T
+$$
+Substitute $L$ into the definition of positive definite matrix:
+$$
+\vec x^TC\vec x=\vec x^TL^TL\vec x=||L\vec x||_2^2\ge0
+$$
+
+### Column Space and QR
 
