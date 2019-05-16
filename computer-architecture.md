@@ -185,7 +185,7 @@ We introduce the concept of semantic gap. It measures the distance between the I
     - How do you add 2 8-bit numbers with only 32-bit addressability?
 - Support for virtual memory.
 
-### Registers
+#### Registers
 
 - How many?
 - Size of each register
@@ -307,3 +307,21 @@ The factor of tradeoffs is also measured by the semantic gap.
 - Small vs. Large
 
 ![1557760482424](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1557760482424.png)
+
+### Tradeoffs: Instruction Length
+
+- Fixed length: Length of all instructions are the same
+  - Easier to decode single instruction in hardware
+  - Easier to decode multiple instructions concurrently
+    - Suppose there is a series of commands of a certain length. If the length of each command is known to the decoders, the decoders would smoothly decode the commands at the same time, while if the length is not known, the problem is somewhat troublesome, for they do not no where to begin and end.
+    - Huffman’s encoding
+  - Wasted bits in instructions (Why is this bad?)
+  - Harder-to-extend ISA (how to add new instructions?)
+- Variable length: Length of instructions different (determined by opcode and sub-opcode)
+  - Compact encoding (Why is this good?)
+  - More logic to decode a single instruction
+  - Harder to decode multiple instructions concurrently
+- Tradeoffs
+  - Code size (memory space, bandwidth, latency) vs. hardware complexity
+  - ISA extensibility and expressiveness vs. hardware complexity
+  - Performance? Energy? Smaller code vs. ease of decode
