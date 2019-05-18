@@ -276,7 +276,22 @@ Basically, the instructions (and programs) specify how to transform the values o
   - All addressing modes can be used with all instruction types
   - Example: VAX
 
-### Tradeoff: Complex vs. Simple Instructions
+### Semantic Gap
+
+- Simple compiler, complex hardware vs. complex compiler, simple hardware
+  - Caveat: Translation (indirection) can change the tradeoff!
+- Burden of backward compatibility
+  - Old versions of programming language may not be compatible.
+- Performance? Energy Consumption?
+  - Optimization opportunity: Example of VAX INDEX instruction: who (compiler vs. hardware) puts more effort into optimization?
+  - Instruction size, code size
+- Small vs. Large
+
+![1557760482424](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1557760482424.png)
+
+### Tradeoffs
+
+#### Complex vs. Simple Instructions
 
 - Complex instruction: An instruction does a lot of work, e.g. many operations
   - Insert to a doubly linked list
@@ -295,20 +310,7 @@ Basically, the instructions (and programs) specify how to transform the values o
 
 The factor of tradeoffs is also measured by the semantic gap.
 
-### Semantic Gap
-
-- Simple compiler, complex hardware vs. complex compiler, simple hardware
-  - Caveat: Translation (indirection) can change the tradeoff!
-- Burden of backward compatibility
-  - Old versions of programming language may not be compatible.
-- Performance? Energy Consumption?
-  - Optimization opportunity: Example of VAX INDEX instruction: who (compiler vs. hardware) puts more effort into optimization?
-  - Instruction size, code size
-- Small vs. Large
-
-![1557760482424](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1557760482424.png)
-
-### Tradeoffs: Instruction Length
+#### Instruction Length
 
 - Fixed length: Length of all instructions are the same
   - Easier to decode single instruction in hardware
@@ -325,3 +327,632 @@ The factor of tradeoffs is also measured by the semantic gap.
   - Code size (memory space, bandwidth, latency) vs. hardware complexity
   - ISA extensibility and expressiveness vs. hardware complexity
   - Performance? Energy? Smaller code vs. ease of decode
+
+#### Uniform Decode
+
+- Uniform decode: Same bits in each instruction correspond to the same meaning
+  - Opcode is always in the same location
+  - Ditto operand specifiers, immediate values, …
+  - Many RISC ISAs: Alpha, MIPS, SPARC
+  - Easier decode, simpler hardware
+  - Enables parallelism: generate target address before knowing the instruction is a branch
+  - Restricts instruction format (fewer instructions?) or wastes space
+- Non-uniform decode
+  - E.g., opcode can be the 1st-7th byte in x86
+
+There are certain differences for RISC and CISC:
+
+- RISC
+  - Simple instructions
+  - Fixed length
+  - Uniform decode
+  - Few addressing modes
+- CISC
+  - Complex instructions
+  - Variable length
+  - Non-uniform decode
+  - Many addressing modes
+
+#### Number of Registers
+
+- Affects:
+  - Number of bits used for encoding register address
+  - Number of values kept in fast storage (register file)
+  - (uarch) Size, access time, power consumption of register file
+- Large number of registers:
+  - Enables better registers allocation (and optimizations) by compiler $\rightarrow$ fewer saves/restores
+    - Larger space for frequently used variables
+    - When there is one variable more than the number of registers, the variable will be pushed onto the stack, called the process of spilling, and store back to the registers, called the process of filling
+  - Larger instruction size
+    - More bits to encode more registers
+  - Larger register file size
+    - Consuming more power
+
+#### Addressing Mdodes
+
+- Addressing mode specifies how to obtain an operand of an instruction
+  - Register
+  - Immediate
+  - Memory (displacement, register indirect, indexed, absolute, memory indirect, auto-increment, auto-decrement)
+- More modes:
+  - help better support programming constructs (arrays, pointer-based accesses)
+  - make it harder for the architect design
+  - too many choices for the compiler?
+    - Many ways to do the same thing complicates compiler design
+- Register indirect mode
+  - Access register by address, $m[r_2]$
+- Memory indirect mode
+  - Access memory by address, $m[m[r_2]]$
+- MIPS: Aligned Access
+  - Alignment: the address of some variable should be multiple of the word size, $A\%N==0$
+  - LW/SW alignment restriction:-byte word-alignment
+    - not designed to fetch memory bytes not within a word boundary
+    - not designed to rotate unaligned bytes into registers
+  - Provide separate opcodes for the infrequent case
+    - LWL/LWR is slower
+      - LWL: Low-word-left, starting from low words and goes left
+    - Note LWL and LWR still fetch with word boundary
+
+### Food for Thought
+
+- How would you design a new ISA?
+- Where would you place it?
+- What design choices would you make in terms of ISA properties?
+- What would be the first question you ask in this process?
+
+## Single-Cycle
+
+### Introduction
+
+#### Instruction Processing
+
+How does a machine process instructions?
+
+- What does processing an instruction mean?
+- Remember the Von Neumann model
+
+$$
+\text{AS} = \text{Architecture (programmer visible) state before an instruction is processed}\\\Downarrow\\\text{Process Instruction}\\\Downarrow\\
+\text{AS'} = \text{Architecture (programmer visible) state after an instruction is processed}
+$$
+
+The “Process instruction” Step:
+
+- ISA specifies abstractly what AS’ should be, given an instruction and AS
+  - It defines an abstract finite state machine where
+    - State = programmer-visible state
+    - Next-state logic = instruction execution specification
+  - From ISA point of view, there are no “intermediate states” between AS and AS’ during instruction execution
+    - One state transition per instruction
+- Microarchitecture implements how AS is transformed to AS’
+  - There are many choices in implementation
+  - We can have programmer-invisible state to optimize the speed of instruction execution: multiple state transitions per instruction
+    - Choice 1: AS $\rightarrow$ AS’ (transform AS to AS’ in a single clock cycle)
+    - Choice 2: AS $\rightarrow$ AS+MS1 $\rightarrow$ AS+MS2 $\rightarrow$ AS+MS3 $\rightarrow$ AS’ (take multiple clock cycles to transform AS to AS’)
+
+A single-cycle machine is a very basic instruction processing engine:
+
+- Each instruction takes a single clock cycle to execute
+- Only combinational logic is used to implement instruction execution
+  - No intermediate, programmer-invisible state updates![1558165214766](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1558165214766.png)
+- What is the clock cycle time determined by?
+  - The time of the longest instruction
+
+Single-cycle vs. Multi-cycle:
+
+- Single-cycle
+  - Each instruction takes a single clock cycle
+  - All state updates made at the end of an instruction’s execution
+  - Big disadvantage: The slowest instruction determines cycle time $\rightarrow$ long clock cycle time
+- Multi-cycle
+  - Instruction processing broken into multiple cycles/stages
+  - State updates can be made during an instruction’s execution
+  - Architecture state updates made only at the end of an instruction’s execution
+  - Advantage over single-cycle: The slowest “stage” determines cycle time
+- Both single-cycle and multi-cycle machines literally follow the Von Neumann model at the microarchitecture level
+
+#### Cycle
+
+Instruction cycle:
+
+- Instructions are processed under the direction of a “control unit” step by step
+- Instruction cycle: Sequence of steps to process an instruction
+- Fundamentally, there are 6 phases. Not all instructions require all six stages.
+  - Fetch
+  - Decode
+  - Evaluate Address
+  - Fetch Operands
+  - Execute
+  - Store Result
+
+Instruction processing “cycle” vs. machine clock cycle:
+
+- Single-cycle machine
+  - All six phases of the instruction processing cycle take a single-machine clock to complete
+- Multi-cycle machine
+  - All six phases of the instruction processing cycle can take multiple machine clock cycles to complete
+  - In fact, each phase can take multiple clock cycles to complete
+
+#### Datapath
+
+Another way of viewing instruction processing:
+
+- Instruction transform Data (AS) to Data’ (AS’)
+- This transformation is done by functional units
+  - Units that “operate” on data
+- These units need to be told what to do to the data
+- An instruction processing engine consists of two components
+  - Datapath: Consists of hardware elements that deal with and transform data signals
+    - functional units that operate on data
+    - hardware structures (e.g. wires and muxes) that enable the flow of data into the functional units and registers
+    - storage units that store data (e.g. registers)
+
+Single-cycle vs. Multi-cycle on Controlling and Data
+
+- Single-cycle machine:
+  - Control signals are generated in the same clock as the one during which data signals are operated on
+  - Everything related to an instruction happens in one clock cycle (serialized processing)
+- Multi-cycle machine:
+  - Control signals needed in the next cycle can be generated in the current cycle
+  - Latency of control processing can be overlapped with latency of datapath operation (more parallelism)
+
+Many ways of Datapath and Control Design
+
+- There are many ways of designing the data path and control logic
+- Single-cycle, multi-cycle, pipelined datapath and control
+- Single-bus vs. multi-bus datapaths
+- Hardwired/combinational vs. microcoded/microprogrammed control
+  - Control signals generated by combinational logic versus
+  - Control signals stored in a memory structure
+
+#### Performance Analysis
+
+- Execution time of an instruction
+  - {CPI} $\times$ {clock cycle time}
+  - CPI = cycles per instruction
+- Execution time of a program
+  - Sum over all instructions [{CPI} $\times$ {clock cycle time}]
+  - {# of instructions} $\times$ {Average CPI} $\times$ {clock cycle time}
+- Single-cycle microarchitecture performance
+  - CPI = 1
+  - Clock cycle time = long
+- Multi-cycle microarchitecture performance
+  - CPI is different for each instruction
+    - Average CPI $\rightarrow$ hopefully small
+  - Clock cycle time = short
+
+### Closer Look
+
+![1558165214766](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1558165214766.png)
+
+#### Assumptions
+
+- “Magic” memory and register file
+- Combinational read
+  - output of the read data port is a combinational function of the register file contents and corresponding read select port
+- Synchronous write
+  - the selected register is updated on the positive edge clock transition when write enable is asserted
+    - Cannot affect read output in between clock edges
+- Single-cycle, synchronous memory
+  - Contrast this with memory that tells when the data is ready
+  - i.e. Ready bit: indicating the read or write is done
+
+#### Instruction Processing
+
+- 5 generic steps
+  - Instruction fetch (IF)
+  - Instruction decode and register operand fetch (ID/RF)
+  - Execute/Evaluate memory address (EX/AG)
+  - Memory operand fetch (MEM)
+  - Store/writeback result (WB)
+
+![1558171538298](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1558171538298.png)
+
+Full MIPS Datapath:
+![1558171578619](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1558171578619.png)
+
+### Single-Cycle Datapath for Arithmetic and Logical Instructions
+
+![1558172125649](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1558172125649.png)
+
+#### R-Type MIPS
+
+R instructions are used when all the data values used by the instruction are located in registers. All R-type instructions have the following format:
+
+```assembly
+OP rd, rs, rt
+```
+
+For the case of additions, the rs and rt gives the location of the variables to be added and rd is the destination of the result.
+
+```assembly
+add $s1, $s2, $s3
+```
+
+in which case this is the same as:
+
+```pseudocode
+s1 = s2 + s3
+```
+
+Converting an R mnemonic into the equivalent binary machine code is performed in the following way:
+
+| opcode | rs     | rt     | rd     | shift (shamt) | funct  |
+| ------ | ------ | ------ | ------ | ------------- | ------ |
+| 6 bits | 5 bits | 5 bits | 5 bits | 5 bits        | 6 bits |
+
+- opcode
+
+  The opcode is the machine code representation of the instruction mnemonic. Several related instructions can have the same opcode. The opcode field is 6 bits long (bit 26 to bit 31).
+
+- rs, rt, rd
+
+  The numeric representations of the source registers and the destination register. These numbers correspond to the \$X representation of a register, such as \$0 or ​\$31. Each of these fields is 5 bits long. (25 to 21, 20 to 16, and 15 to 11, respectively). Interestingly, rather than rs and rt being named r1 and r2 (for source register 1 and 2), the registers were named "rs" and "rt" for register source, register target and register destination.
+
+- Shift (shamt)
+
+  Used with the shift and rotate instructions, this is the amount by which the source operand *rs* is rotated/shifted. This field is 5 bits long (6 to 10).
+
+- Funct
+
+  For instructions that share an opcode, the **funct** parameter contains the necessary control codes to differentiate the different instructions. 6 bits long (0 to 5). Example: Opcode 0x00 accesses the ALU, and the funct selects which ALU function to use.
+
+#### R-Type ALU Instructions
+
+- Assembly (e.g. register-register signed addition)
+
+  ```assembly
+  ADD rd_reg rs_reg rt_reg
+  ```
+
+- Machine encoding
+
+  - ![1558171775794](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1558171775794.png)
+  - Notice: the number of bits on each block in the picture above correspond to the number of required bits for the address of the registers, as is shown in the pictures to come, having number notations 25-21, 20-16, 15-11
+
+- Semantics
+```pseudocode
+if MEM[PC] == ADD rd rs rt
+    GPR[rd] = GPR[rs] + GPR[rt]
+    PC = PC + 4
+```
+where GPR is “general purpose register”.
+
+If the current program counter points to a command as above, add the values in the registers accordingly and store the result accordingly, while increment the program counter at the same time.
+
+![1558172092675](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1558172092675.png)
+
+#### I-Type MIPS
+
+I instructions are used when there is immediate values involved. The immediate value may be a maximum of 16 bits long and no larger.
+
+```assembly
+OP rt, IMM(rs)
+```
+
+Or another form:
+
+```assembly
+OP rt, rs, IMM
+```
+
+Where rt is the target register, rs is the source register and IMM is the immediate value. Hence, addi instruction may be called as:
+
+```assembly
+addi $s1, $s2, 100
+```
+
+meaning:
+
+```
+s1 = s2 + 100
+```
+
+the value of s2 plus 100 is stored in s1.
+
+I instructions are converted into machine code words in the following format:
+
+| opcode | rs     | rt     | IMM     |
+| ------ | ------ | ------ | ------- |
+| 6 bits | 5 bits | 5 bits | 16 bits |
+
+- Opcode
+
+  The 6-bit opcode of the instruction. In I instructions, all mnemonics have a one-to-one correspondence with the underlying opcodes. This is because there is no **funct** parameter to differentiate instructions with an identical opcode. 6 bits (26 to 31)
+
+- rs, rt
+
+  The source and target register operands, respectively. 5 bits each (21 to 25 and 16 to 20, respectively).
+
+- IMM
+
+  The 16 bit immediate value. 16 bits (0 to 15). This value is usually used as the offset value in various instructions, and depending on the instruction, may be expressed in two's complement.
+
+#### I-Type ALU Instructions
+
+- Assembly (e.g. register-immediate signed additions)
+
+  ```pseudocode
+  ADDI rt_reg rs_reg immediate_16
+  ```
+
+- Machine encoding
+
+![1558172367214](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1558172367214.png)
+
+- Semantics
+
+```pseudocode
+if MEM[PC] == ADDI rt rs immediate
+	GPR[rt] = GPR[rs] + sign-extend(immediate)
+	PC = PC + 4
+```
+
+This is very similar to the R-type, only changing the source of the second operand of addition to a immediate value.
+
+![1558172681382](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1558172681382.png)
+
+### Single-Cycle Datapath for Data Movement Instructions
+
+#### MIPS Load and Store
+
+```assembly
+LW $t, C($s)
+SW $t, C($s)
+```
+
+LW loads from memory C(\$s) to register \$t, while SW saves from register \$t to memory C(\$t).
+
+#### Load Instructions
+
+- Assembly (e.g. load 4-byte word)
+
+```assembly
+LW rt_reg offset_16 (base_reg)
+```
+
+- Machine encoding
+
+![1558179537273](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1558179537273.png)
+
+- Semantics
+
+```pseudocode
+if MEM[PC] == LW rt offset_16 (base)
+	EA = sign-extend(offset) + GPR[base]
+	GPR[rt] = MEM[translate(EA)]
+	PC = PC + 4
+```
+
+![1558179730585](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1558179730585.png)
+
+#### Store Instructions
+
+- Assembly (e.g. store 4-byte word)
+
+```assembly
+SW rt_reg offset_16 (base_reg)
+```
+
+- Machine encoding
+
+![1558179974052](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1558179974052.png)
+
+- Semantics
+
+```pseudocode
+if MEM[PC] == SW rt offset_16 (base)
+	EA = sign-extend(offset) + GPR[base]
+	MEM[translate(EA)] = GPR[rt]
+	PC = PC + 4
+```
+
+![1558180053762](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1558180053762.png)
+
+#### Load-Store Datapath
+
+![1558180687150](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1558180687150.png)
+
+#### Datapath for Non-Control-Flow Instructions
+
+![1558180733302](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1558180733302.png)
+
+### Control Flow Instructions
+
+#### J-Type MIPS
+
+J instructions are used when a jump needs to be performed. The J instruction has the most space for an immediate value, because addresses are larger numbers.
+
+```assembly
+OP LABEL
+```
+
+where OP is the mnemonic for the particular jump instruction, and LABEL is the target address to jump to.
+
+J instructions have the following machine-code format:
+
+| Opcode | Pseudo-Address |
+| ------ | -------------- |
+|        |                |
+
+- Opcode
+
+  The 6 bit opcode corresponding to the particular jump command. (26 to 31).
+
+- Address
+
+  A 26-bit shortened address of the destination. (0 to 25). The two least significant bits are removed, and the 4 most significant bits are removed, and assumed to be the same as the current instruction's address.
+
+#### MIPS Jump
+
+Instruction j or jr with let the program counter jump to the specified location. The difference between them is that J takes immediate value and JR takes register, or in other word, J is the J-type instruction and JR is the R-type instruction.
+
+```assembly
+J IMM
+JR $t0
+```
+
+We can do more than jumping. Jump and Link instructions are similar to the jump instructions, except that they store the address of the next instruction (the one immediately after the jump) in the return address (\$ra; \$31) register. This allows a subroutine to return to the main body routine after completion. JAL is a J-type instruction and JALR is a R-type instruction.
+
+```assembly
+JAL IMM
+JALR $t0
+```
+
+#### Unconditional Jump Instructions
+
+In C, an unconditional jump is any “break”, “continue”, “goto”, “return”, which is not in the body of an “if” or “else” or “case”. A conditional jump requires other information such as a boolean flag. Therefore, unconditional jumps do not read from any register or memory except for the instructions themselves, while conditional jumps do. The location of a unconditional jump is and must be specified by the instruction.
+
+- Assembly
+
+```assembly
+J immediate_26
+```
+
+- Machine encoding
+
+![1558181120866](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1558181120866.png)
+
+- Semantics
+
+```pseudocode
+if MEM[PC] == J immediate_26
+	target = {PC[32:28], immediate_26, 2'b00}
+	PC = target
+```
+
+The unconditional jump instruction concat the current program counter and the operand from the instruction to move the program counter to the right place.
+
+![1558181328270](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1558181328270.png)
+
+As is mentioned above, conditional jumps read from registers and memory, or only registers, for efficiency.
+
+![1558181854202](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1558181854202.png)
+
+#### MIPS Branch
+
+Instead of using rt as a destination operand, rs and rt are both used as source operands and the immediate is sign extended and added to the PC to calculate the address of the instruction to jump to if the branch is taken. The instructions are all I-type. The +4 is not always necessary.
+
+```assembly
+BEQ rt, rs, IMM
+```
+
+Branch if rs and rt are equal.
+
+```pseudocode
+if rs == rt
+	PC = PC + 4 + IMM
+else
+	PC = PC + 4
+```
+
+```assembly
+BNE rt, rs, IMM
+```
+
+Branch if rs and rt are not equal.
+
+```pseudocode
+if rs != rt
+	PC = PC + 4 + IMM
+else
+	PC = PC + 4
+```
+
+```assembly
+BGEZ rt, rs, IMM
+```
+
+Branch if rs is greater or equal to 0.
+
+```pseudocode
+if rs >= 0
+	PC = PC + 4 + IMM
+else
+	PC = PC + 4
+```
+
+```assembly
+BLEZ rt, rs, IMM
+```
+
+Branch if rs is less than or equal to 0.
+
+```pseudocode
+if rs <= 0
+	PC = PC + 4 + IMM
+else
+	PC = PC + 4
+```
+
+```assembly
+BGTZ rt, rs, IMM
+```
+
+Branch if rs is greater than 0.
+
+```pseudocode
+if rx > 0
+	PC + PC + 4 + IMM
+else
+	PC = PC + 4
+```
+
+```assembly
+BLTZ rt, rs, IMM
+```
+
+Branch if rs is less than 0.
+
+```pseudocode
+if rs < 0
+	PC = PC + 4 + IMM
+else
+	PC = PC + 4
+```
+
+#### Conditional Branch Instructions
+
+The implementation of BEQ:
+
+![1558188861786](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1558188861786.png)
+
+### Decode Control Signal
+
+#### Single-Cycle Hardwired Control
+
+- As combinational function of Inst = MEM[PC]
+
+![1558189584129](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1558189584129.png)
+
+- Consider
+  - All R-type and I-type ALU instructions
+  - LW, SW
+  - BEQ, BNE, BLEZ, BGTZ
+  - J, JR, JAL, JALR
+
+#### Single-Bit Control Signals
+
+|          | When Destination-asserted                           | When asserted                                        | Equation                                               |
+| -------- | --------------------------------------------------- | ---------------------------------------------------- | ------------------------------------------------------ |
+| RegDest  | GPR write select according to rt, i.e., inst[20:16] | GPR write select according to rd, i.e., inst[15:11]  | opcode==0                                              |
+| ALUSrc   | second ALU input from second GPR read port          | second ALU input from sign-extended 16-bit immediate | (opcode!=0)&&(opcode!=BEQ)&&(opcode!=BNE)              |
+| MemtoReg | Steer ALU result to GPR write port                  | steer memory load to GPR wr. port                    | opcode==LW                                             |
+| RegWrite | GPR write disabled                                  | GPR write enabled                                    | (opcode!=SW)&&(opcode!=Bxx)&&(opcode!=J)&&(opcode!=JR) |
+| MemRead  | Memory read disabled                                | Memory read port return load value                   | opcode==LW                                             |
+| MemWrite | Memory write disabled                               | Memory write enabled                                 | opcode==SW                                             |
+| PCSrc1   | According to PCSrc2                                 | next PC is based on 26-bit immediate jump target     | (opcode==J)                                            |
+| PCSrc2   | next PC = PC + 4                                    | next PC is based on 16-bit immediate branch target   | (opcode==Bxx)&&“bcond is satisfied”                    |
+
+#### ALU Control
+
+- case opcode
+  - ‘0’  select operation according to funct
+  - ‘ALUi’  selection operation according to opcode
+  - ‘LW’  select addition
+  - ‘SW’  select addition
+  - ‘Bxx’  select bcond generation function
+  - __  don’t care
+- Example ALU operations
+  - ADD, SUB, AND, OR, XOR, NOR, etc.
+  - bcond on equal, not equal, LE zero, GT zero, etc.
