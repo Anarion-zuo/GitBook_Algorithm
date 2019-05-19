@@ -944,7 +944,7 @@ The implementation of BEQ:
 | PCSrc1   | According to PCSrc2                                 | next PC is based on 26-bit immediate jump target     | (opcode==J)                                            |
 | PCSrc2   | next PC = PC + 4                                    | next PC is based on 16-bit immediate branch target   | (opcode==Bxx)&&“bcond is satisfied”                    |
 
-#### ALU Control
+### ALU Control
 
 - case opcode
   - ‘0’  select operation according to funct
@@ -956,3 +956,134 @@ The implementation of BEQ:
 - Example ALU operations
   - ADD, SUB, AND, OR, XOR, NOR, etc.
   - bcond on equal, not equal, LE zero, GT zero, etc.
+
+R-type:
+
+![1558257391210](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1558257391210.png)
+
+#### Control Box
+
+- Combinational Logic $\rightarrow$ Hardware Control
+  - Idea: Control signals generated combinationally based on instruction
+  - Necessary in a single-cycle microarchitecture…
+- Sequential Logic $\rightarrow$ Sequential/Microprogrammed Control
+  - Idea: A memory structure contains the control signals associated with an instruction
+  - Control Store
+
+### Microarchitecture
+
+#### Analysis
+
+- Every instruction takes 1 cycle to execute
+  - CPI (Cycles per instruction) is only 1
+- How long each instruction takes is determined by how long the slowest instruction takes to execute
+  - Even though many instructions do not need that long to execute
+- Clock cycle time of the microarchitecture is determined by how long it takes to complete the slowest instrucion
+  - Critical path of the design is determined by the processing time of the slowest instruction
+
+What is the slowest instruction to process?
+
+- Memory is not magic
+- What if memory sometimes takes 100ms to access?
+- Does it make sense to have a simple register to register add or jump to take {100ms + all else} to do a memory operation?
+- And, what if you need to access memory more than once to process an instruction?
+
+#### Single Cycle uArch Complexity
+
+- Contrived
+  - All instructions run as slow as the slowest instruction
+- Inefficient
+  - All instructions run as slow as the slowest instruction
+  - Must provide worst-case combinational resources in parallel as required by any instruction
+  - Need to replicate a resource if it is needed more than once by an instruction during different parts of the instruction processing cycle
+- Not necessarily the simplest way to implement an ISA
+  - Single-cycle implementation of REP MOVS (x86) or INDEX (VAX)?
+- Not easy to optimize/improve performance
+  - Optimizing the common case does not work (e.g. common instructions)
+
+#### Microarchitecture Design Principles
+
+- Critical path design
+  - Find the maximum combinational logic delay and decrease it
+  - Break a path into multiple cycles if it takes too long
+
+The power consumed by a microprocessor may be expressed in this way:
+$$
+P\propto CV^2f
+$$
+where frequency is more or less correlated to the voltage, causing a cubic relation between power and frequency of clock. By minimizing these factors, or the proportion factor, which is determined by the property of the wires, we can lower the power consumption, thus achieve critical design.
+
+- Bread and butter (common case) design
+  - Spend time and resources on where it matters
+    - i.e., improve what the machine is really designed to do
+  - Common case vs. uncommon case
+    - Common cases are what the system mostly do, therefore matters
+- Balanced design
+  - Balanced instruction/data flow through hardware components
+  - Design to eliminate bottlenecks: balance the hardware for the work
+    - The clock cycle cannot be too fast so that the slow operations may be fully done
+
+## Multi-Cycle
+
+### Introduction
+
+![1558267573535](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1558267573535.png)
+
+- Goal: Let each instruction take (close to) only as much time it really needs
+- Idea
+  - Determine clock cycle time independently of instruction processing time
+  - Each instruction takes as many clock cycles as it needs to take
+    - Multiple state transitions per instruction
+    - The states followed by each instruction is different
+- ISA specifies abstractly what AS’ should be, given an instruction and AS
+  - It defines an abstract finite state machine where
+    - State = programmer-visible state
+    - Next-state logic = instruction execution specification
+  - From ISA point of view, there are no “intermediate states” between AS and AS’ during instruction execution
+    - One state transition per instruction
+- Microarchitecture implements how AS is transformed to AS’
+  - There are many choices in implementation
+  - We can have programmer-invisible state to optimize the speed of instruction execution: multiple state transitions per instruction
+    - Choice 1: AS $\rightarrow$ AS’ (transform AS to AS’ in a single clock cycle)
+    - Choice 2: AS $\rightarrow$ AS+MS1 $\rightarrow$ AS+MS2 $\rightarrow$ AS+MS3 $\rightarrow$ AS’ (take multiple clock cycles to transform AS to AS’)
+
+$$
+\text{AS}=\text{Architectural (programmer visible) state at the beginning of an instruction}\\\Downarrow\\
+\text{Step1: Process part of instruction in one clock cycle}\\\Downarrow\\
+\text{Step2: Process part of instruction the next clock cycle}\\\Downarrow\\\vdots\\\Downarrow\\\text{AS'}=\text{
+Architectural (programmer visible) state at the end of a clock cycle
+}
+$$
+
+#### Benefits of Multi-Cycle Design
+
+- Critical path design
+  - Can keep reducing the critical path independently of the worst-case processing time of any instruction
+- Bread and butter (common case) design
+  - Can optimize the number of states it takes to execute “important” instructions that make up much of the execution time
+- Balanced design
+  - No need to provide more capability or resources than really needed
+    - An instruction that needs resource X multiple times does not require multiple X’s to be implemented
+    - Leads to more efficient hardware: Can reuse hardware components needed multiple times for an instruction
+
+#### Microprogrammed Multi-Cycle uArch
+
+- Key Idea for Realization
+  - One can implement the “process instruction” step as a finite state machine that sequences between states and eventually returns back to the “fetch instruction” state
+  - A state is defined by the control signals asserted in it
+  - Control signals for the next state are determined in current state
+- Instruction Processing Cycle
+  - Fetch
+  - Decode
+  - Evaluate Address
+  - Fetch Operands
+  - Execute
+  - Store Result
+  - Repeat them all
+
+#### A Basic Multi-Cycle Microarchitecture
+
+- Instruction processing cycle divided into “states”
+  - A stage in the instruction processing cycle can take multiple states
+- A multi-cycle microarchitecture sequences from state to state process an instruction
+  - The behavior of the machine in a state is completely determined by control signals in that state
