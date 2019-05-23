@@ -1122,3 +1122,24 @@ $$
 
 ![1558274650534](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1558274650534.png)
 
+- R for ready flag. If the memory is not ready, the system waits.
+- BEN for branch enabled.
+
+What determines next-state control signals?
+
+- What is happening in the current clock cycle
+  - See the 9 control signals coming form “Control” block
+- The instruction that is being executed
+  - IR[15:11] coming from the Data Path
+- Whether the condition of a branch is met, if the instruction being processed is a branch
+
+The state machine for multi-cycle processing:
+
+- The behavior of the LC-3b uarch is completely determined by
+  - the 35 control signals and
+  - additional 7 bits that go into the control logic from the datapath
+- 32 control signals completely describes the state of the control structure
+- We can completely describe the behavior of the LC-3b as a state machine, i.e., a directed graph of 
+  - Nodes (one corresponding to each state)
+  - Arcs (showing flow from each state to the next state(s))
+
