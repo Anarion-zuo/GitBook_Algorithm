@@ -1087,3 +1087,38 @@ $$
   - A stage in the instruction processing cycle can take multiple states
 - A multi-cycle microarchitecture sequences from state to state process an instruction
   - The behavior of the machine in a state is completely determined by control signals in that state
+- The behavior of the entire processor is specified fully by a finite state machine
+- In a state (clock cycle), control signals control 2 things:
+  - How the datapath should process the data
+  - How to generate the control signals for the next clock cycle
+
+#### Terminology
+
+- Control signals associated with the current state
+  - Microinstruction
+- Act of transitioning from one state to another
+  - Determining the next state and the microinstruction for the next state
+  - Microsequencing
+- Control store stores control signals for every possible state
+  - Store for microinstructions for the entire FSM
+- Microsequencer determines which set of control signals will be used in the next clock cycle (i.e., next state)
+
+#### What Happens in a Clock Cycle?
+
+- The control signals (microinstruction) for the current state control 2 things
+  - Processing in the data path
+  - Generation of control signals (microinstruction) for the next cycle
+- Datapath and microsequencer operate concurrently
+- Question: why not generate control signals for the current cycle in the current cycle?
+  - This will lengthen the clock cycle
+  - Why would it lengthen the clock cycle?
+  - It cannot use the advantage of datapath and microsequencer operating concurrently, as is shown below:
+
+![1558274143435](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1558274143435.png)
+
+![1558274214943](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1558274214943.png)
+
+#### A Simple LC-3b Control and Datapath
+
+![1558274650534](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1558274650534.png)
+
