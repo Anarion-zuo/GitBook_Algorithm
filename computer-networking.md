@@ -81,11 +81,11 @@ Comparing to TCP/IP, a protocol model, the OSI is more about abstractions and ge
 
 ## Ethernet
 
-### Addressing
+### Physical Address
 
 #### Call
 
-Every host in the ethernet network has a physical address assigned to it when it is manufactured. The address is called Media Access Control (MAC) Address. When the address of a host is called out in the network, the host listen to the following data transmitted, and interpret it.
+Every host in the Ethernet network has a physical address assigned to it when it is manufactured. The address is called Media Access Control (MAC) Address. When the address of a host is called out in the network, the host listen to the following data transmitted, and interpret it.
 
 ![img](https://d3c33hcgiwev3.cloudfront.net/imageAssetProxy.v1/TfRUvOrvEea0PA6g5Mr3FA_e47dd6762e6038044ba4aad6ddfd659f_3.2.2.3.gif?expiry=1558742400000&hmac=OAORIzxvTC1uqKAH5m7v6Ksk8BzFsMujsde9sJzeCaY)
 
@@ -132,3 +132,55 @@ Frames are also referred to as Layer 2 Protocol Data Units (PDUs), for the proto
 - **Frame Check Sequence(FCS)** - The FCS contains a 4-byte value that is created by the device that sends data and is recalculated by the destination device to check for damaged frames.
 
 Frames that do not match these limits are not processed by the receiving hosts. Ethernet network does not care what kind of information it is careering, only transmitting data as it should be.
+
+### Hierarchy
+
+#### Reasons
+
+- Reduce the numbers of calling addresses on a network of large scale. Each time when a message is to be sent, the host broadcast the address to the whole network. This mechanism surely makes traffic hard in large scale systems.
+- Addition local networks can be added without impacting the performance of the existing ones.
+
+#### Structure
+
+- Access Layer - provides connections to hosts in a local Ethernet network.
+- Distribution Layer - interconnects the smaller local networks.
+- Core Layer - provides a high-speed connection between distribution layer devices.
+
+With a hierarchical design, there is a need for a logical addressing scheme that can identify the location of a host.
+
+- IPv4 - is the most common addressing scheme on the internet, i.e. Internet Protocol version 4.
+- IPv6 - currently being implemented as a replacement to IPv4.
+- IPv4 and IPv6 will coexist for the foreseeable future. IP refers to both IPv4 and IPv6.
+
+![img](D:\Gitbook\GitBook_Algorithm\static\fafsadzgdggxcbzbfd)
+
+#### Logical Addressing
+
+The physical address (MAC) of a host does not depend on the place that the host is connected to the network, or which network, while the logical address does change because of it. IP is assigned to each host by a network administrator based on the local network, and consists of 2 parts.
+
+The first part of an IP is identical for all hosts connected to the same local network, while the second part varies, assigned by the administrator.
+
+![img](D:\Gitbook\GitBook_Algorithm\static\bnhhsgzdczs)
+
+In order to send the information, wrapped in Ethernet frames, to the destination, the source host first send the frame along with the MAC address to the router on the upper layer. The router finds the host having the corresponding address and send the frames to the destination found.
+
+In general, the physical address is for communications within the network, while the logical address is for communications between the different networks.
+
+#### Layers
+
+- Access Layer
+
+  The access layer provides a connection point for end user devices to the network and allows multiple hosts to connect to other hosts through a network device, usually a switch or access point. Typically, all devices within a single access layer will have the same network portion of the IP address.
+
+  If a message is destined for a local host, based on the network portion of the IP address, the message remains local. If it is destined for a different network, it is passed up to the distribution layer. Switches provide the connection to the distribution layer devices, usually a router.
+
+- Distribution Layer
+
+  The distribution layer provides a connection point for separate networks and controls the flow of information between the networks. It typically contains more powerful switches than the access layer as well as routers for routing between networks. Distribution layer devices control the type and amount of traffic that flows from the access layer to the core layer.
+
+- Core Layer
+
+  The core layer is a high-speed backbone layer with redundant (backup) connections. It is responsible for transporting large amounts of data between multiple end networks. Core layer devices typically include very powerful, high-speed switches and routers. The main goal of the core layer is to transport data quickly.
+
+### Access Layer
+
