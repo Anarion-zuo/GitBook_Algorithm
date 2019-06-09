@@ -8,8 +8,8 @@ We have resources and requests. Each of the requests corresponds to an interval 
 
 The strategy is to maximize the profit at each step without apparent look ahead.
 
-1. Use a simple rule to select a request $$i​$$ .
-2. Reject all requests incompatible with $$i​$$ .
+1. Use a simple rule to select a request $$i$$ .
+2. Reject all requests incompatible with $$i$$ .
 3. Repeat until all requests are processed.
 
 Wrong answers:
@@ -21,7 +21,7 @@ Wrong answers:
 
 As can be seen from the picture, the 4 requests at the top is the answer while it cannot be found by the methods above.
 
-The correct answer should be that to scan the $$f(i)​$$s associated with the list of requests that we have and pick the one that is minimum, which also signifies that find the request associated with the earliest finish time, and eliminate the ones that do not satisfy the condition, at each step.
+The correct answer should be that to scan the $$f(i)$$s associated with the list of requests that we have and pick the one that is minimum, which also signifies that find the request associated with the earliest finish time, and eliminate the ones that do not satisfy the condition, at each step.
 
 ### Proof of Greedy Strategy by Induction
 
@@ -76,7 +76,7 @@ Given n points in a plane,
 $$
 S=\{(x_i,y_i)|_{i=1,2,...}\}
 $$
-Assume no 2 have the same x and y coordinate and no 3 in a line. A convex hull is the smallest convex polygon containing all points in S, and we are going to call that $CH(S)​$.
+Assume no 2 have the same x and y coordinate and no 3 in a line. A convex hull is the smallest convex polygon containing all points in S, and we are going to call that $CH(S)$.
 
 ![1550826046400](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1550826046400.png)
 
@@ -95,7 +95,7 @@ The simplest idea of merging is to look at all pairs in turn for all points on b
 
 ![1550896139397](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1550896139397.png)
 
-If connect $a_4​$ to $b_1​$, the problem is not solved. Sometimes, it is not the line between the highest points that is the highest line. The factor showing the height of the line should be told by a intersection between the connecting line and a vertical line between the 2 hulls.
+If connect $a_4$ to $b_1$, the problem is not solved. Sometimes, it is not the line between the highest points that is the highest line. The factor showing the height of the line should be told by a intersection between the connecting line and a vertical line between the 2 hulls.
 
 ![1550898175718](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1550898175718.png)
 
@@ -109,11 +109,11 @@ $$
 We want to do it better than sort-and-find approach. And not only to find the median value, but also to find any value for a given rank.
 
 0. For a given array of numbers $S$, make a clever choice of $x\in S$.
-1. Compute $k=rank(x)​$.
-2. Split the array into 2 parts. $B=\{y\in S|y<x\},C=\{y\in S|y>x\}​$
-3. If $k=desired\_rank​$, return. Else if $k>i​$, run $B​$, else run $C​$.
+1. Compute $k=rank(x)$.
+2. Split the array into 2 parts. $B=\{y\in S|y<x\},C=\{y\in S|y>x\}$
+3. If $k=desired\_rank$, return. Else if $k>i$, run $B$, else run $C$.
 
-For a worst case scenario, we choose x badly every time, which makes B and C extremely unbalanced. The complexity would be $\theta(n^2)​$. The idea of choosing x cleverly is to split the array into subarrays with size $\left\lceil\frac{n}{5}\right\rceil​$. Sort each subarray with complexity $\theta(\left\lceil\frac{n}{5}\right\rceil)​$. Choose the median of the medians of the subarrays to be x.
+For a worst case scenario, we choose x badly every time, which makes B and C extremely unbalanced. The complexity would be $\theta(n^2)$. The idea of choosing x cleverly is to split the array into subarrays with size $\left\lceil\frac{n}{5}\right\rceil$. Sort each subarray with complexity $\theta(\left\lceil\frac{n}{5}\right\rceil)$. Choose the median of the medians of the subarrays to be x.
 
 ![1550900613561](C:\Users\a\AppData\Roaming\Typora\typora-user-images\1550900613561.png)
 
@@ -134,13 +134,13 @@ When calculated by hand, time complexity of matrix multiplication is $\theta(mn^
 1. Evenly split the matrices into 4 parts. $A=\left[\begin{array}\\
    A_{11} & A_{12}\\
    A_{21} & A_{22}
-   \end{array}\right]​$
+   \end{array}\right]$
 2. Compute. $C_{11}=A_{11}B_{11}+A_{12}B_{21}$
 3. Recursively compute.
 
 Time complexity:
 $$
-T(n)=8T(\frac{n}{2})+O(n^2)
+T(n)=8T(\frac{n}{2})+O(n^2)=O(n^3)
 $$
 
 ### Strassen
@@ -162,7 +162,7 @@ C_{21}=M_2+M_4\\
 C_{22}=M_1-M_2+M_3+M_6
 \end{cases}
 $$
-A man must work on a certain area for 10 years to come up with this algorithm, oh my god! Each of $C_{xx}​$ only requires a single time of multiplication. Time complexity:
+A man must work on a certain area for 10 years to come up with this algorithm, oh my god! Each of $C_{xx}$ only requires a single time of multiplication. Time complexity:
 $$
 T(n)=7T(\frac{n}{2})+O(n^2)
 $$
@@ -194,55 +194,77 @@ The other cases follows the same idea.
 
 ## Divide and Conquer: Fast Fourier Transform (FFT)
 
-### Operations on Polynomials
-
-#### Representation
-
-##### Coefficient Vector
-
+Polynomial in summation and vector form:
 $$
-A(x,n)=\sum_{i=0}^{n-1}a_ix_i=a_0+a_1x+a_2x^2+...+a_{n-1}x^{n-1}
+A(x)=a_0+a_1x+a_2x^2+...+a_{n-1}x^{n-1}=\sum_{k=0}^{n-1}a_kx^k=<a_0,a_1,...,a_{n-1}>
 $$
 
-##### Roots
-
-$$
-A(x)=\prod_{i=0}^{n-1}(x-r_i)
-$$
-
-According to some basic theorem of algebra, every polynomial can be represented by a series of roots.
-
-##### Samples
-
-Also according to some basic theorem of algebra, every polynomial can be represented by a series of 2-d points.
+### Operations
 
 #### Evaluation
 
-Compute $A(x_0)​$.
+Compute $A(x)$.
 
-The naive idea may be to separately compute each term and add them up with complexity $\theta(n^2)$. A slightly smarter idea is to time a $x_0$ each time when computing a new term with complexity $\theta(n)​$. A slightly smarter way than that is the Horner’s Rule:
+Simply, apply Horner’s rule:
 $$
-A(x)=a_0+x(a_1+x(a_2+...+x(a_{n-1})...)),\theta(n)
+A(x)=a_0+x(a_1+x(a_2+...+x(a_{n-1})...))\sim\theta(n)
 $$
+Horner’s rule is to compute $x^{k+1}$ by $x^k$.
 
-#### Addition
+#### Addittion
 
-Compute $A(x)+B(x)$. Simply adding corresponding coefficients.
+Add 2 polynomials.
+$$
+C(x)=A(x)+B(x)=\sum_{k=0}^{n-1}(a_k+b_k)\sim\theta(n)
+$$
 
 #### Multiplication
 
-Compute $A(x)\times B(x)$. When doing this by hand:
+Multiply 2 polynomials.
 $$
-c_k=\sum_{j=0}^ka_jb_{k-j},\theta(n^2)
+c_k=\sum_{j=0}^ka_jb_{k-j}\sim\theta(n^2)
+$$
+This is an operation of convolution, which multiplies 2 vectors in opposite direction. Therefore, once we solve the problem of polynomial multiplication, we solve convolution.
+
+### Ways of Representation
+
+#### Coefficient Vector
+
+What is used above.
+
+#### Roots
+
+The roots of equation $A(x)=0$, $r_0,...,r_{n-1}$, gives a formula of representing the polynomial:
+$$
+A(x)=c(x-r_0)(x-r_1)...(x-r_{n-1})
+$$
+It is very hard to add.
+
+#### Samples
+
+A lot of points in 2D space can generate a polynomial curve passing all of them.
+$$
+A(x_k)=y_k
 $$
 
-|                | Coefficient Vector | Roots    | samples  |
-| -------------- | :----------------: | -------- | -------- |
-| Evaluation     |      $ O(n)$       | $ O(n) $ | $O(n^2)$ |
-| Addition       |       $O(n)$       | $\infty$ | $ O(n) $ |
-| Multiplication |      $O(n^2)$      | $ O(n) $ | $ O(n) $ |
+The multiplication is easy:
+$$
+y_k=y_k^{(a)}y_k^{(b)}=A(x_k)B(x_k)\sim\theta(n)
+$$
 
-### Converting between Coefficient Vector and Samples
+Therefore, we are going to use the samples way of representation to compute multiplication for any polynomials.
+
+| Algorithms     | Coefficient Vectors | Roots    | Samples  |
+| -------------- | ------------------- | -------- | -------- |
+| Evaluation     | $O(n)$              | $O(n)$   | $O(n^2)$ |
+| Addition       | $O(n)$              | $\infty$ | $O(n)$   |
+| Multiplication | $O(n^2)$            | $O(n)$   | $O(n)$   |
+
+If we can convert between coefficient vectors form and samples form in $\theta(n\log n)$ time, we can have a better algorithm.
+
+### Transform Coefficients to Samples
+
+#### General Idea
 
 $$
 V_n=\begin{pmatrix}
@@ -256,86 +278,130 @@ a_0\\
 a_1\\
 \vdots\\
 a_{n-1}
-\end{pmatrix}
-$$
-
-For a transform from coefficient to samples:
-$$
-\begin{pmatrix}
+\end{pmatrix},\begin{pmatrix}
 y_0\\
 y_1\\
 \vdots\\
 y_{n-1}
-\end{pmatrix}=V_n\times A
+\end{pmatrix}=V_n\times A\sim O(n^2)
+$$
+
+where the Vandermonde matrix is constructed by samples. The coefficients can be got by solving the linear system.
+$$
+y=V^{-1}A\sim O(n^2)
+$$
+We can have quadratic time to transform back and forth.
+
+#### Divide and Conquer
+
+- Goal: find $A(x)$ for $x\in X$, where $X$ is the sample set.
+- Divide into even and odd coefficients
+
+$$
+A_{even}=\sum_{k=0}^{n/2-1}a_{2k}x^k=<a_0,a_2,...>,A_{odd}=\sum_{k=0}^{n/2}a_{2k+1}x^k=<a_1,a_3,...>
+$$
+
+- Combine and transform back to $A(x)$:
+
+$$
+A(x)=A_{even}(x^2)+xA_{odd}(x^2)
+$$
+
+- Conquer: compute the even and odd terms. The following is about conquering.
+
+The even and odd terms are polynomials just like $A$ with another set of $x$ different from $X$. The new set is described to be:
+$$
+y\in X^2=\{x^2|x\in X\}
+$$
+The time complexity is recursively:
+$$
+T(n,|X|)=2T(\frac{n}{2},|X|)+O(n+|X|)
+$$
+The time complexity is summation of the time of the divided step and the time of dividing, $\theta(n)$, and the time of computing odd and even terms, $|X|$.
+
+Solve the recursion tree and the time complexity is:
+$$
+T(n,|X|)=O(n2^{\log_2n})=O(n^2)
+$$
+If we can let the set of samples get smaller at each dividing operation, the recursion relation becomes:
+$$
+T(n,|X|)=2T(\frac{n}{2},\frac{|X|}{2})+O(n+|X|)
+$$
+$n$ and $|X|$ change in exactly the same way. It is equivalent to:
+$$
+T(n)=2T(\frac{n}{2})+O(n)=O(n\log_2n)
+$$
+By taking the square root of the elements in $X$, the new set have the double amount of elements, such as:
+$$
+X=\{-1,1\}\Rightarrow X^2=\{1\}
+$$
+The square root of $-1,1$ is $i,-i,1,-1$. These kind of sets have the property of collapsing by square all elements.
+$$
+|X^2|=\frac{|X|}{2}
+$$
+The base case of $X=\{1\}$ can derive all of the sets of this kind.
+
+The square root of $i$ can be computed by the coordinate of the point with argument $\pi/4$ of the unit circle on the complex plain, and the same goes with all $i^{1/2n}$.
+
+![1559650170245](assets/1559650170245.png)
+
+The $n$th uniform separation of the unit circle is given:
+$$
+\theta=0,\frac{1}{n}\tau,\frac{2}{n}\tau,...,\frac{n-1}{n}\tau,\tau=2\pi,x_k=e^{i\theta_k}=\exp(\frac{ik\tau}{n})
+$$
+
+#### Apply back
+
+Take:
+$$
+x_k=\exp(\frac{ik\tau}{n})
+$$
+The entities of the Vandermonde matrix can be computed easily:
+$$
+V_{jk}=x_j^k=\exp(\frac{ijk\tau}{n})
+$$
+The result of the sample multiplication is:
+$$
+C^*_k=A_k^*B_k^*,A^*=FFT(A),B^*=FFT(B)
+$$
+We will have to take the inverse Fourier transform of $C^*$ and retrieve $C$.
+$$
+C=IFFT(C^*)
+$$
+The inverse Fourier transform is to take the inverse matrix of the Vandermonde matrix and times $C^*$.
+$$
+V^{-1}=\frac{\bar V}{n}
+$$
+The proof is simple. Suppose:
+$$
+P=V\bar V
+$$
+The entities of $P$:
+$$
+P_{jk}=\sum_{m=0}^{n-1}\exp(i\tau jm/n)\exp(-i\tau mk/n)=\sum_m\exp(i\tau\frac{m}{n}(j-k))
+$$
+When $j=k$, the entities on the diagonal is:
+$$
+P_{jj}=\sum_m1=n
+$$
+When $j\ne k$:
+$$
+P_{jk}=\frac{(\exp(i\tau\frac{j-k}{n}))^n-1}{...}=0
+$$
+for:
+$$
+\exp(i\tau)=1
 $$
 
 
-#### Divide and Conquer Algorithm
-
-Goal: To compute all $A(x)$ for $x\in X​$.
-
-1. Divide the coefficients into even and odd parts.
-   $$
-   A_{even}(x)=\sum_{k=0}^{\frac{1}{2}n-1}a_{2k}x^k,
-   A_{odd}(x)=\sum_{k=0}^{\frac{1}{2}n}a_{2k+1}x^k
-   $$
-
-2. Conquer. Recursively compute  $A_{even}(y)$ and $A_{odd}(y)$ for $y\in X^2$.
-
-3. Combine.
-   $$
-   A(x)=A_{even}(x^2)+xA_{odd}(x^2)
-   $$
-
-Time complexity:
+Take entities of the complex conjugate of $V$ is given by the complex conjugates of the original $X$.
 $$
-T(n,|X|)=2T(\frac{1}{2}n,|X|)+O(n+|X|)=O(n^2)
+x_k=\exp(-\frac{ik\tau}{n})
 $$
-If, some how, $T(n,|X|)=2T(\frac{1}{2}n,\frac{1}{2}|X|)+O(n+|X|)​$, where $|X|​$ changes in the same way as $n​$, the result can be $O(n\log_2n)​$. To achieve such goal, we construct $X​$ by the property of negative numbers and imaginary numbers, for the square of negative numbers are positive numbers and the square of imaginary numbers are negative numbers, so that when taking the square of the set, the set squeezes and becomes small. For some special cases, we take X as following, taking even-sect points from a unit circle on a complex plane, also known as the nth root of unity:
+The final result is:
 $$
-\begin{align*}
-&|X|=1,X=\left\{1\right\}\\
-&|X|=2,X=\left\{1,-1\right\}\\
-&|X|=4,X=\left\{1,-1,i,-i\right\}\\
-&|X|=8,X=\left\{1,-1,i,-i,\pm\frac{1}{\sqrt{2}}(1+i),\pm\frac{1}{\sqrt{2}}(1-i)\right\}\\
-\end{align*}
+A=V^{-1}A^*,nV^{-1}_{jk}=\exp(-\frac{ijk\tau}{n})
 $$
-In angular form:
-$$
-(\cos\theta,\sin\theta)=\cos\theta+i\sin\theta=e^{i\theta},\theta\in\left\{0,\frac{1}{n}\tau,\frac{2}{n}\tau,...,\frac{n-1}{n}\tau,\right\},\tau=2\pi
-$$
-In general:
-$$
-x_k=e^{\frac{ik\tau}{n}}
-$$
-
-#### Discrete Fourier Transform
-
-$$
-y=V\times A,V_{jk}=x_j^k=e^{\frac{ijk\tau}{n}}
-$$
-
-The FFT is the divide and conquer version of DFT.
-
-### Fast Polynomials Multiplication
-
-Notations:
-$$
-A^\star=FFT(A),B^\star=FFT(B),C^\star_k=A^\star_kB^\star_k,\forall k
-$$
-For V, the inverse matrix:
-$$
-V^{-1}=\frac{\bar{V}}{n},\bar{V}_{jk}=\frac{1}{V_{jk}}=e^{-\frac{ijk\tau}{n}}
-$$
-Proof for that:
-$$
-V\bar{V}=P,P_{jk}=\sum_{m=0}^{n-1}e^{i\tau jm/n}e^{-i\tau mk/n}=\sum_{m=0}^{n-1}e^{i\tau(j-k)m/n}
-$$
-Obviously, when $j=k$, $P_{jk}=1$. For $j\ne k​$:
-$$
-\sum_{m=0}^{n-1}(e^{i\tau(j-k)/n)^m}=\frac{e^{i\tau(j-k)}-1}{e^{i\tau(j-k)/n}-1}=0
-$$
-QED.
 
 ## Data Structure: B-Tree
 
@@ -345,8 +411,8 @@ A B-Tree has nodes with n elements and n+1 children between each of the elements
 
 $B$ is the number of elements on each node.
 
-1. $B\le​$ #children $\le 2B​$
-2. $B-1\le$ #keys $< 2B-1​$
+1. $B\le$ #children $\le 2B$
+2. $B-1\le$ #keys $< 2B-1$
 3. All leaves are at same depth
 
 ### Insertion
@@ -359,7 +425,7 @@ When deleting on a leaf node, just delete. Under other more complicated cases, w
 
 ## Divide and Conquer: van Emde Boas Trees
 
-The goal is to maintain n elements among $\left\{0,1,...,u-1\right\}​$, a set of continuous integers,with operations of insertion and deletion with complexity $\theta(\log_2\log_2n)​$. When doing binary search on the levels of binary trees, we get:
+The goal is to maintain n elements among $\left\{0,1,...,u-1\right\}$, a set of continuous integers,with operations of insertion and deletion with complexity $\theta(\log_2\log_2n)$. When doing binary search on the levels of binary trees, we get:
 $$
 T(k)=T(\frac{1}{2}k)+O(1),k=\log_2u
 $$
@@ -482,7 +548,7 @@ For a n-element array A,
 
 #### Banic
 
-Pick the pivot x to be the first of the last element of the array, with equal probability. Do partition based on that given x on $O(n)​$ time. The worst case, as before, is to sort a reversely arranged array and one part of the partition result has no element, where the time complexity is:
+Pick the pivot x to be the first of the last element of the array, with equal probability. Do partition based on that given x on $O(n)$ time. The worst case, as before, is to sort a reversely arranged array and one part of the partition result has no element, where the time complexity is:
 $$
 T(n)=T(0)+T(n-1)+\theta(n)=\theta(n^2)
 $$
@@ -567,7 +633,7 @@ $$
 P\{X\ge E[X]+r\}\le e^{-\frac{2r^2}{m}}
 $$
 
-### Perfect Hash
+### Universal&Perfect Hash
 
 #### Dictionary Problem
 
@@ -579,19 +645,25 @@ Dictionary is a kind of abstract data type. It maintains a set of items, each wi
 
 A easy and good enough way of implementation is hashing with chain, which has amortizingly constant time complexity.
 
-#### Randomized
-
-There are 2 kinds of randomization. In all cases, there are random inputs. However, inputs are not generally controlled by programmers. Therefore, we want our algorithms to be “actually” random by themselves.
-
-#### Arbitrary Selection of Hash Functions
-
-When building a hash table, instead of sticking to a single hash function, we choose a hash function from some set randomly, each time we rebuild or extend our hash table, which is the meaning of word universal. Similarly, the set of hash functions must have the property of:
+A good hash function satisfies the following property:
 $$
 \forall k,\exist m,P\{h(k_i)=h(k_j)\}\le\frac{1}{m},h\in H
 $$
-There is a theorem requiring proving. For n arbitrary distinct keys for random $h\in H$, where $H$ is universal, there is, 
+For a pair of arbitrary key, the probability of collision is strictly bounded by the reciprocal of a positive large number $m$.
+
+#### Randomized
+
+There are 2 kinds of randomization. In all cases, there are random inputs, called average input. Average is not as good as random, as in the case of quick sort. When we always choose the first element to be the partition pivot, the average case may be good, while the real case may not be assured. Therefore, as in the case of quick sort, we artificially add some randomness to the process.
+
+#### Arbitrary Selection of Hash Functions
+
+In order to introduce some real randomness into the process, we take a set of hash functions $H$ and arbitrarily pick a hash function from the at each time of the calculation. The set of hash functions must have the property of a *good hash function*:
 $$
-E[collisions]\le1+\alpha
+\forall k,\exist m,P\{h(k_i)=h(k_j)\}\le\frac{1}{m},h\in H
+$$
+There is a theorem requiring a proof. For n arbitrary distinct keys for random $h\in H$, where $H$ is universal, there is, 
+$$
+E[\#collisions]\le1+\alpha
 $$
 The proof is easy. Suppose the keys are $k_1,...,k_n$, let indicator $I_{ij}$ be:
 $$
@@ -602,7 +674,7 @@ I_{ij}=\begin{cases}
 $$
 Hence:
 $$
-E[collisions]=E[\sum_{i\ne j}I_{ij}+I_{ii}]=1+\sum_{i\ne j}E[I_{ij}]\le \frac{n}{m}+1
+E[\#collisions]=P(h(k_i)=h(k_j))=E[\sum_{i\ne j}I_{ij}+I_{ii}]=1+\sum_{i\ne j}E[I_{ij}]\le \sum_{j\ne i}\frac{1}{m}+1\le1+\frac{n}{m}
 $$
 If we can find a universal family, we can guarantee a good performance in hashing with chains.
 
@@ -611,7 +683,7 @@ If we can find a universal family, we can guarantee a good performance in hashin
 Obviously, a bad universal family is a set of all hash functions, for it takes too much time and space. Instead of that naive and lazy idea, we choose a family called “Dot-product Family”. It is presumed that these terms are held to be true.
 
 - $u$ is the size of the family.
-- Assume m is prime, while doubling numbers we add a tiny change to achieve this.
+- Assume $m$, the table size, is prime, although we are doubling it.
 - Assume $u=m^r$ for integer $r$.
 - View key $k$ in base m, $k=(k_0,k_1,...,k_{r-1}),k_i\in[0,m-1]$.
 
@@ -634,7 +706,7 @@ We here prove the first family holding such properties as that it is universal.
 For a given $k\ne k'$, for a certain position if $d$ digit, the 2 keys differ from each other, $k_d\ne k_d'$.
 $$
 \begin{align*}
-P(h_a(k)=h_a(k'))\\
+&P(h_a(k)=h_a(k'))\\
 &=P(\sum_{i=0}^{r-1}a_i(k_i-k_i')=0\mod{m})\\
 &=P(a_d(k_d-k_d')+\sum_{i\ne d}a_i(k_i-k_i')=0\mod{m})\\
 &=P(a_d=-(k_d-k_d')^{-1}\sum_{i\ne d}a_i(k_i-k_i'))\\
@@ -650,18 +722,30 @@ $$
   - $O(n)$ worst-case space to store.
   - Nearly linear time to build with high probability.
 
-In order to store a more stable data structure, instead of hash with chains, we hash with hash tables. Namely, change the linked lists into hash tables.
+In order to store a more stable data structure, instead of hash with chains, we hash with hash tables. Namely, change the linked lists into hash tables, and guarantee in the second level of hashing there is no collision.
 
-1. Pick a certain hash function $h_1:\{0,1,...,u-1\}\rightarrow\{0,1,...,m-1\},m=\theta(n)$ from a universal hash family.
+1. Pick a certain hash function $h_1:\{0,1,...,u-1\}\rightarrow\{0,1,...,m-1\},m=\theta(n)$ from a universal hash family. $m$ is better chosen to be prime, so it is not $n$ but $\theta(n)$.
 2. For each slot $j\in\{0,1,...,m-1\}$,
-   1. $l_i$ is the number of keys among n hashing to the slot.
-   2. Pick $h_{2,j}:\{0,...,u-1\}\rightarrow\{0,...,l_j^2-1\}$ from the universal family.
+   1. Hash every input to the slots. $l_i$ is the number of keys among n keys hashed to the slot. If $\sum_jl_j^2>c\times n$, where $c$ is some constant, redo this hashing process.
+   2. Pick randomly $h_{2,j}:\{0,...,u-1\}\rightarrow\{0,...,l_j^2-1\}$ from the universal family. If there is a collision in one of the slots, repick $h_{2,j}$ for the slot.
+   3. There would be no collision after this process.
+
+The following is to prove that the number of times of picking $h_{2,j}$ is bounded strictly by a small number with high probability.
+$$
+\begin{align*}
+& P(h_{2,j}(k_i)=h_{2,j}(k_{i'})),(i\ne i')\\
+&\le\sum_{i\ne i'}P_{h_{2,j}}(h_{2,j}(k_i)=h_{2,j}(k_{i'}))\\
+&\le \begin{pmatrix}l_i\\2\end{pmatrix}\frac{1}{l_i^2}\\
+&\le\frac{1}{2}
+\end{align*}
+$$
+The first less than or equal to sign is for ignoring the correlation. The second’s one over $l^2$ is for hashing in $l^2$ length space and the most probability is $1/l^2$. The number of summations is the combinatorial number.
 
 ### Data Structure Augmentation
 
 #### Easy Tree Augmentation
 
-The goal of such a data structure is to store an extra field for some function $f(\text{subtree rooted at }x)$ at each node x in $x.f()$. It is not always possible, while it is possible when suppose x.f can be computed in constant time from x or the children of x or the f of the children of x. If modify set $S$ of nodes, then it costs the number of ancestors of $S​$ at most to update f fields. The rotation in an AVL tree may trigger some change in the f fields, therefore the modification begins at the lowest level.
+The goal of such a data structure is to store an extra field for some function $f(\text{subtree rooted at }x)$ at each node x in $x.f()$. It is not always possible, while it is possible when suppose x.f can be computed in constant time from x or the children of x or the f of the children of x. If modify set $S$ of nodes, then it costs the number of ancestors of $S$ at most to update fields. The rotation in an AVL tree may trigger some change in the f fields, therefore the modification begins at the lowest level.
 
 #### Order-statistic Trees
 
@@ -673,19 +757,19 @@ The goal of such a data structure is to store an extra field for some function $
 
 All operation is by $O(\log_2n)$. If use easy tree augmentation with f(subtree) = number of nodes in subtree.
 
-```
+```pseudocode
 x.f = 1 + sum(children.f for children in x.children)
 ```
 
 In AVL:
 
-```
+```pseudocode
 rank = x.left.size + 1
 ```
 
 x.left means all of the left parts, not only children.
 
-```
+```pseudocode
 select(i):
 	x = root
 	while i > 0
@@ -696,7 +780,7 @@ select(i):
             x = x.left
         if i > rank:
             x = x.right
-        i -= rank
+        	i -= rank
 ```
 
 If we insert a element smaller than all other existing elements, the method of caching rank would not be valid and we have to change every notion of rank for each nodes. Similarly, it is hard to maintain depth and other properties of nodes and we tend to give up on those things.
@@ -711,8 +795,8 @@ When y is the root and x is leftmost element of the right subtree of y or rightm
 
 In this case, for insert operations, we no longer split the node into exact half and let the middle one go up to the parent. Instead, we split the node into “almost” half, with sizes 2 and 1, and if a node has 4 children, we split the node by half, each takes 2 children.
 
-```
-search(x from y):
+```pseudocode
+finger_search(x from y):
 	v = leaf containing y
     while v is not x:
         if v.min <= x <= v.max:
@@ -725,13 +809,13 @@ search(x from y):
 	return v
 ```
 
-The code satisfy the time complexity requirement.
+The level pointers are to move the pivot to the right interval, thus to the right subtree. The code satisfy the time complexity requirement.
 
 #### Orthogonal Range Search
 
 For a given set of points under a certain dimensional space, give a orthogonal region (rectangle, etc) and list all of the points inside the region. The goal is summarized to be:
 
-Process n points in d-D to support query, a given box, and find the number of points in the box and the kth point in the box. The output is of size $\theta(k)$.
+Process n points in d-D to support query, a given box, and find the number of points in the box and the kth point in the box. The output is of size $\theta(k)$. The time complexity of the process is bounded by $O(\log_2^dn+|output|)$.
 
 ##### 1D Version
 
@@ -744,7 +828,11 @@ range_query([a, b]):
 	trim common prefix...
 ```
 
-The trim tick is to return all nodes between a and b, including a and b. The finding process can be separated into 2 parts. Searching start from both a ad b, going upward, until they reach a common root. For the lower bound, as we go upward, if the child is the left child of the parent, store the parent, and if not, ignore the parent and proceed. The stored nodes and the number of elements in the interval is the sum of the size of all of the nodes as root of a subtree. The number of nodes we may get is $\theta(\log_2n)$, which is height.
+Find the position of the upper and lower bound first. The trim tick is to return all nodes between a and b, including a and b. The finding process can be separated into 2 parts. Searching start from both a ad b, going upward, until they reach a common root.
+
+For the lower bound, as we go upward, if the child is the left child of the parent, store the parent, and if not, ignore the parent and proceed. The stored nodes and the number of elements in the interval is the sum of the size of all of the nodes as root of a subtree. The whole process upon the lower bound is to find the number of nodes right to it.
+
+The upper bound case is symmetric to the lower case. The number of nodes we may get is $\theta(\log_2n)$, which is height.
 
 ##### 2D Version
 

@@ -302,3 +302,159 @@ $$
 
 ### Column Space and QR
 
+## Nonlinear Problems
+
+### Root
+
+Given: $f:\R^n\rightarrow\R^m$, Find: $\vec x^*$ with $f(\vec x^*)=\vec0$.
+
+#### Typical Regularizing Assumptions
+
+1. Continuous: $f(\vec x)\rightarrow f(\vec y)$ as $\vec x\rightarrow\vec y$.
+2. Lipschitz: $||f(\vec x)-f(\vec y)||\le C||\vec x-\vec y||$.
+3. Differentiable.
+4. $C^k$: $k$ derivatives exist and are continuous.
+
+#### Single-Variable $\R^1\rightarrow\R^1$
+
+##### Bisection Algorithm
+
+Intermediate Value Theorem:
+
+> Suppose $f:[a,b]\rightarrow\R$ is continuous. Suppose $f(x)<u<f(y)$. Then, there exists $z$ between $x$ and $y$ such that $f(z)=u$.
+
+Thus, if:
+$$
+f(l)f(r)<0
+$$
+then:
+$$
+\exists x_0\in[l,r],f(x_0)=0
+$$
+Processes:
+
+1. Compute $c=(l+r)/2$.
+2. If $f(c)=0$, return $x^*=c$.
+3. If $f(l)f(c)<0$, take $r=c$. Otherwise take $l=c$.
+4. Return to step 1 until $|r-l|<\epsilon$; then return $c$.
+
+The algorithm must converge unconditionally.
+
+To examine the convergence of the algorithm, we introduce a factor $E_k>|x_k-x^*|$ as the convergence criterion, such that when $E_k$ is bounded, the algorithm is convergent. In the case of bisection, there is:
+$$
+E_k=|r_k-l_k|,E_{k+1}\le\frac{1}{2}E_k
+$$
+
+##### Fixed Points
+
+Find $x^*$ for:
+$$
+x^*=g(x^*)
+$$
+Any equation can be transformed into the fixed points form:
+$$
+f(x)=0\Rightarrow f(x)+x=x
+$$
+The strategy is to find the convergent sequence such that:
+$$
+x_{k+1}=g(x_k)
+$$
+Compute along the sequence. If it converges, the solution can be found.
+
+The convergence criterion is:
+$$
+E_k=|x_k-x^*|=|g(x_{k-1})-g(x^*)|\le C|x_{k-1}-x^*|=CE_{k-1}
+$$
+If $g$ is Lipschitz, the sequence is convergent.
+
+It can also be shown that the convergence criterion is bounded even by quadratic degree, even when $g'(x^*)=0$. Thus, it is quadratically convergent.
+$$
+E_k=|g(x_{k-1})-g(x^*)|=\frac{1}{2}|g''(x^*)(x_{k-1}-x^*)^2+O((x_{k-1}-x^*)^3)|\le\frac{1}{2}|(g''(x^*)+\epsilon)(x_{k-1}-x^*)^2|
+$$
+When applying the algorithm, it is better to know a starting point near $x^*$.
+
+##### Newton’s Method
+
+Solve for Taylor’s first expansion:
+$$
+f(x)=f(x_k)+f'(x_k)(x-x_k)\Rightarrow x_{k+1}=x_k-\frac{f(x_k)}{f'(x_k)}
+$$
+The solution is the fixed point iteration on:
+$$
+g(x)=x-\frac{f(x)}{f'(x)}
+$$
+We have quadratic convergence in this case.
+$$
+g'(x)=1-\frac{f'(x)^2-f(x)f''(x)}{f'(x)^2}=\frac{f(x)f''(x)}{f'(x)^2},g'(x^*)=0
+$$
+Taking derivative is hard, therefore, we have the secant method.
+
+##### Secant Method
+
+$$
+x_{k+1}=x_k-\frac{f(x_k)(x_k-x_{k-1})}{f(x_k)-f(x_{k-1})}
+$$
+
+The convergence rate is $\frac{1+\sqrt5}{2}$.
+
+What we want is a hybrid method of secant/Newton with convergence guarantees of bisection. For example, Dekker’s Method:
+
+> Take secant step if it is in the bracket, bisection step otherwise.
+
+##### Conclusion
+
+- Unlikely to solve exactly, so we settle for iterative methods.
+- Must check that method converges at all.
+- Convergence rates:
+  - Linear: $E_{k+1}\le CE_k$ for some $0\le C<1$
+  - Super-linear: $E_{k+1}\le CE_k^r,r>1$
+  - Quadratic: $r=2$
+  - Cubic: $r=3$
+- Time per is iteration also important.
+
+#### Multiple Variables $\R^n\rightarrow\R^m$
+
+##### Usual Assumption
+
+$$
+n\ge m
+$$
+
+##### Newton’s Method
+
+Find derivatives by Jacobian:
+$$
+(Df)_{ij}=\frac{\partial f_i}{\partial x_j}
+$$
+The size of Jacobian matrix is $m\times n$.
+
+Solve Taylor’s expansion as before:
+$$
+f(\vec x)=f(\vec x_k)+Df(\vec x_k)(\vec x-\vec x_k)\Rightarrow\vec x_{k+1}=\vec x_k-[Df(\vec x_k)]^{-1}f(\vec x_k)
+$$
+We do not compute the inverse explicitly. Instead, we do the Gaussian elimination to solve for the result.
+
+We can prove that the algorithm is convergent:
+
+1. $\vec x_{k+1}=g(\vec x_k)$ converges when the maximum-magnitude eigenvalue of $Dg$ is less than 1.
+2. Extend observation about (quadratic) convergence in multiple dimensions.
+
+We still have 2 problems:
+
+1. Differentiation is hard.
+2. $Df(\vec x_k)$ changes at every iteration, which means differentiation is even made harder.
+
+We cannot apply the extended secant method to make things better, for there is no enough data points for us to compute the Jacobian. However, we can make things better by computing only a part of the Jacobian, which is the directional derivative. A directional derivative is a vector.
+$$
+D_{\vec v}f=Df\times\vec v
+$$
+From another perspective, we can have something like a secant-like approximation:
+$$
+J(\vec x_k-\vec x_{k-1})=f(\vec x_k)-f(\vec x_{k-1}),J=Df(\vec x_k)
+$$
+This is the Broyden’s method. The outline of the steps are:
+
+- Maintain current iterate $\vec x_k$ and approximation $J_k$ of Jacobian near $\vec x_k$.
+- Update $\vec x_k$ using Newton-like step.
+- Update $J_k$ using secant-like formula.
+
