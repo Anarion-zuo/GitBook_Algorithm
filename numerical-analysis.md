@@ -458,3 +458,227 @@ This is the Broyden’s method. The outline of the steps are:
 - Update $\vec x_k$ using Newton-like step.
 - Update $J_k$ using secant-like formula.
 
+Derive the Broyden step:
+$$
+\min_{J_k}||J_k-J_{k-1}||_{Pro}^2,s.t.J_k(\vec x_k-\vec x_{k-1})=f(\vec x_k)-f(\vec x_{k-1})
+$$
+The optimization problem is not hard to solve. The solution is:
+$$
+J_k=J_{k-1}+\frac{f(\vec x_k)-f(\vec x_{k-1})-J_k\delta\vec x}{||\vec x_k-\vec x_{k-1}||_2^2}(\delta x)^T
+$$
+The expression can be written in a simpler form:
+$$
+J_k=J_{k-1}+\vec u_k\vec v_k^T
+$$
+We rewrite it for it has simpler form for its inverse, called the Sherman-Morrison formula. For any matrix $A$:
+$$
+(A+\vec u\vec v^T)^{-1}=A^{-1}-\frac{A^{-1}\vec u\vec v^TA^{-1}}{1+\vec vA^{-1}\vec u}
+$$
+It can be easily check by multiplying both sides with $(A+\vec u\vec v^T)$.
+
+The Newton step:
+$$
+\vec x_{k+1}=\vec x_k-J^{-1}_kf(\vec x_k)
+$$
+For initialization, we can either find another way to make an approximation, or lazily set $J_0=I$. With the initialization and the Sherman-Morrison formula, we can update $J_k^{-1}$ without computing inverse or performing Gaussian elimination.
+$$
+J_k^{-1}=J_{k-1}^{-1}-\frac{J_{k-1}^{-1}\vec u\vec v^TJ_{k-1}^{-1}}{1+\vec vJ_{k-1}^{-1}\vec u}
+$$
+
+##### Automatic Differentiation
+
+Notice that if we have the value of some function and its derivative at a certain point, we can compute the value of their sum, product and fraction.
+$$
+(x,\frac{dx}{dt}),(y,\frac{dy}{dt})\Rightarrow(x+y,\frac{dx}{dt}+\frac{dy}{dt}),(xy,\frac{dx}{dt}y+\frac{dy}{dt}x),(\frac{x}{y},\frac{ydx/dt+xdy/dt}{y^2})...
+$$
+
+### Optimization
+
+#### No Constraints
+
+Find global minimum.
+
+> $\vec x^*\in\R^n$ is a global minimum of $f:\R^n\rightarrow\R$ if $f(\vec x^*)\le f(\vec x),\forall \vec x$.
+
+Similarly, find local minimum:
+
+> $\vec x^*\in\R^n$ is a local minimum of $f:\R^n\rightarrow\R$ if $\exists\epsilon>0,f(\vec x^*)\le f(\vec x),\forall||\vec x-\vec x^*||<\epsilon$.
+
+Taylor’s expansion in gradient:
+$$
+f(\vec x)=f(\vec x_0)+\nabla f(\vec x_0)(\vec x-\vec x_0)
+$$
+Take $\vec x-\vec x_0=\alpha\nabla f(\vec x_0)$:
+$$
+f(\vec x_0+\alpha\nabla f(\vec x_0))=f(\vec x_0)+\alpha||\nabla f(\vec x_0)||^2
+$$
+Find the stationary point:
+$$
+\nabla f(\vec x_0)=\vec0
+$$
+Typical strategy for all optimization problems:
+
+1. Find critical point(s)
+2. Check if it is a local minimum
+3. Repeat until it is
+
+The checking step is done by checking the Hessian matrix.
+
+Taylor’s expansion in Hessian:
+$$
+f(\vec x)=f(\vec x_0)+\nabla f(\vec x_0)(\vec x-\vec x_0)+\frac{1}{2}(\vec x-\vec x_0)^TH_f(\vec x-\vec x_0)
+$$
+$H_f$:
+
+- positive definite $\Rightarrow$ local minimum
+- negative definite $\Rightarrow$ local maximum
+- indefinite $\Rightarrow$ saddle point
+- not invertible $\Rightarrow$ nothing (repeat or give up)
+
+We may have other ways to check for optimality.
+
+- Convexity
+- Quasi-Convex
+
+Finding a local minimum is finding a root of the derivative. However, we do not like too many orders of derivatives in our problems. Therefore, we abandon Newton/secant method.
+
+##### Unimodular Optimization
+
+The definition of Unimodular is:
+
+> $f:[a,b]\rightarrow\R$ is unimodular if there exists $x^*\in[a,b]$, such that $f$ is decreasing for $x\in[a,x^*]$ and increasing for $x\in[x^*,b]$
+
+Some observation may be made:
+
+- $f(x_0)\ge f(x_1)\Rightarrow f(x)\ge f(x_1),\forall x\in[a,x_0]$, $[a,x_0]$ can be discarded.
+- $f(x_1)\ge f(x_0)\Rightarrow f(x)\ge f(x_0),\forall x\in[x_1,b]$, $[x_1,b]$ can be discarded.
+
+Iteratively remove almost $1/3$ of the interval in each iteration. To reduce the number of iterations, we try to reuse evaluations.
+
+Assume the working interval can be squeezed to $[0,1]$. If we take $x_0=\alpha,x_1=1-\alpha,\alpha\in(0,1/2)$, remove the right interval $[x_1,b]$ and have a new interval $[0,1-\alpha]$. We wish that the old $x_0$ is going to act as the new $x_1$, which means:
+$$
+\alpha=(1-\alpha)^2\Rightarrow \alpha=\frac{3-\sqrt5}{2},1-\alpha=\frac{-1+\sqrt5}{2}=\tau
+$$
+The separation of interval in this fashion is called the Golden Section Search, for the appearance of $\tau$, the golden ratio. The steps are as following:
+
+1. Initialize $a,b$ so that $f$ is unimodular on $[a,b]$.
+2. Take $x_0=a+(1-\tau)(b-a),x_1=a+\tau(b-a)$. Initialize $f_0=f(x_0),f_1=f(x_1)$.
+3. Iterate until $b-1$ is sufficiently small:
+   1. If $f_0\ge f_1$, remove the interval $[a,x_0]$:
+      1. Move left side $a\leftarrow x_0$.
+      2. Reuse previous iteration: $x_0\leftarrow x_1,f_0\leftarrow f_1$.
+      3. Generalize new sample: $x_1\leftarrow a+\tau(b-a),f_1\leftarrow f(x_1)$.
+   2. If $f_1>f_0$, remove the interval $[x_1,b]$:
+      1. Move right side $b\leftarrow x_1$.
+      2. Reuse previous iteration: $x_1\leftarrow x_0,f_1\leftarrow f_0$.
+      3. Generate new sample: $x_0\leftarrow a+(1-\tau)(b-a),f_0\leftarrow f(x_0)$.
+
+##### Gradient Descent
+
+The direction of the gradient is where the function increases fastest. Therefore, by treading along the opposite direction, we may find its minimum. The steps are as follows:
+
+Iterate until convergence:
+
+1. $g_k(t)=f(\vec x_k-t\nabla f(\vec x_k))$.
+2. Find $t^*$ minimizing (decreasing) $g_k$.
+3. $\vec x_{k+1}=\vec x_k-t^*\nabla f(\vec x_k)$.
+
+The stopping condition is when the gradient is nearly 0, and don’t forget to check optimality.
+
+The process of minimizing $g_k$ is the Line Search. It is a one-dimensional optimization and don’t have to minimize completely, for it is an iterating process. One of the good choices may be:
+$$
+\vec x_{k+1}=\vec x_k-H_f(\vec x_k)^{-1}\nabla f(\vec x_k)
+$$
+However, the Hessian is too hard to compute. Instead of computing Hessian and its inverse directly, we have the Quasi-Newton Optimization, where we compute the inverse of Hessian approximately.
+$$
+\vec x_{k+1}=\vec x_k-\alpha_kB_k^{-1}\nabla f(\vec x_k),B_k=H_f(\vec x_k)
+$$
+For details, see Nocedal & Wright’s book.
+
+#### Constraints
+
+##### Basic Definitions
+
+$$
+\min f(\vec x)\quad s.t.g(\vec x)=\vec0,h(\vec x)\ge\vec0
+$$
+
+Feasible point and feasible set:
+
+> A feasible point is any point $\vec x$ satisfying $g(\vec x)=\vec0,h(\vec x)\ge\vec0$. The feasible set is the set of all points $\vec x$ satisfying these constraints.
+
+Critical point:
+
+> A critical point is one satisfying constraints that also is a local maximum, minimum or saddle point of $f$ within the feasible set.
+
+KKT condition, see Convex Optimization.
+
+## Integration and Differentiation
+
+### Integral
+
+Quadrature:
+
+> Given a sampling of $n$ values $f(x_1),f(x_2),...,f(x_n)$, find an approximation of $\int_a^bf(x)dx$.
+>
+> $x_i$s may be fixed or may be chosen by the algorithm.
+
+In general, the Quadrature rule is:
+$$
+Q[f]=\sum_iw_if(x_i)
+$$
+where $w_i$ describes the contribution of $f(x_i)$.
+
+#### Rules
+
+Midpoint Rule:
+
+$$
+\int_a^bf(x)dx=(b-a)f(\frac{a+b}{2})
+$$
+
+Trapezoidal Rule:
+
+$$
+\int_a^bf(x)dx=(b-a)\frac{f(a)+f(b)}{2}
+$$
+
+Simpson’s Rule:
+
+$$
+\int_a^bf(x)dx=\frac{b-a}{6}(f(a)+4f(\frac{a+b}{2})+f(b))
+$$
+
+
+
+
+
+#### Newton-Cotes Quadrature
+
+$x_i$s are evenly spaced in $[a,b]$ and symmetric. This is the most commonly used strategy.
+
+- Closed: includes end points:
+
+$$
+x_k=a+\frac{(k-1)(b-a)}{n-1}
+$$
+
+- Open: does not include end points:
+
+$$
+x_k=a+\frac{k(b-a)}{n+1}
+$$
+
+Apply the rules upon subintervals:
+$$
+\delta x=\frac{b-a}{k},x_i=a+i\delta x
+$$
+For example, for Trapezoidal rule:
+$$
+\int_a^bf(x)dt=\sum_{i=1}^k\frac{f(x_i)+f(x_{i+1})}{2}\delta x=\delta x(\frac{1}{2}f(a)+f(x_1)+...+f(x_{k-1})+\frac{1}{2}f(b))
+$$
+For Simpson:
+$$
+\int_a^bf(x)dx=\frac{\delta x}{3}[f(a)+2\sum_{i=1}^{n/2-1}f(x_{2i})+4\sum_{i=1}^{n/2}f(x_{2i-1})+f(b)]
+$$
+The error of the midpoint and trapezoid quadrature is of $O(dx^3)$, while the Simpson quadrature is of $O(dx^5)$.
