@@ -682,3 +682,89 @@ $$
 \int_a^bf(x)dx=\frac{\delta x}{3}[f(a)+2\sum_{i=1}^{n/2-1}f(x_{2i})+4\sum_{i=1}^{n/2}f(x_{2i-1})+f(b)]
 $$
 The error of the midpoint and trapezoid quadrature is of $O(dx^3)$, while the Simpson quadrature is of $O(dx^5)$.
+
+#### Multivariable
+
+We apply the process of single variable computation and deal with each dimensions separately. The error of computation accumulates according to the growth in dimension. When computing high dimension integrals, the Monte Carlo method is more appropriate than the iterating strategy, causing less error.
+
+### Differentiation
+
+If a function can be represented as a summation of others:
+$$
+f'(x)=\sum_ia_i\phi'(x)
+$$
+
+#### Linear First
+
+$$
+f'(x)=\frac{f(x+h)-f(x)}{h},f'(x)=\frac{f(x)-f(x-h)}{h}
+$$
+
+Error:
+$$
+\frac{f(x+h)-f(x)}{h}=\frac{f'(x)h+O(h^2)}{h}=f'(x)+O(h)
+$$
+
+#### Quadratic First
+
+$$
+f'(x)=\frac{f(x+h)-f(x-h)}{2h}
+$$
+
+Error:
+$$
+\begin{align*}
+&f'(x)-\frac{f(x+h)-f(x-h)}{2h}\\
+=&f'(x)-\frac{f'(x)h+1/2f''(x)h^2+O(h^3)-(f'(x)(-h)+1/2f''(x)h^2+O(h^3))}{2h}\\
+=&f'(x)-\frac{2hf'(x)+O(h^3)}{2h}=O(h^2)
+\end{align*}
+$$
+
+#### Quadratic Second
+
+$$
+f''(x)=\frac{f(x+h)-2f(x)+f(x-h)}{h^2}
+$$
+
+This is a direct plug in for the quadratic first.
+$$
+\begin{align}
+&\frac{f(x+h)-2f(x)+f(x-h)}{h^2}\\
+=&\frac{-2f(x)+f(x)+f'(x)h+1/2f''(x)h^2+1/6f'''(x)h^3+O(h^4)+f(x)+f'(x)(-h)+1/2f''(x)h^2+1/6f'''(x)(-h^3)+O(h^4)}{h^2}\\
+=&f''(x)+O(h^2)
+\end{align}
+$$
+
+#### Richardson Extrapolation
+
+$$
+D(h)=\frac{f(x+h)-f(x)}{h}=f'(x)+\frac{1}{2}f''(x)h+O(h^2),D(\alpha h)=f'(x)+\frac{1}{2}f''(x)\alpha h+O(\alpha^2h^2)
+$$
+
+The relation between the first and second derivatives can be represented as:
+$$
+\begin{pmatrix}f'(x)\\f''(x)\end{pmatrix}=\begin{pmatrix}
+1&\frac{1}{2}h\\
+1&\frac{1}{2}\alpha h
+\end{pmatrix}^{-1}\begin{pmatrix}D(h)\\D(\alpha h)\end{pmatrix}+O(h^2)^T
+$$
+
+This is a fast iterating way of computing derivatives. The inverse matrix can be previously computed:
+$$
+\begin{pmatrix}
+1&\frac{1}{2}h\\
+1&\frac{1}{2}\alpha h
+\end{pmatrix}^{-1}=
+\frac{2}{(\alpha-1)h}
+\begin{pmatrix}
+\frac{1}{2}\alpha h&-\frac{1}{2}h\\
+-1&1
+\end{pmatrix}
+$$
+
+
+#### Choosing $h$
+
+- Too big: Bad approximation of $f'$.
+- Too small: Numerical issues, $f(x)=f(x+h)$.
+
